@@ -1,17 +1,3 @@
-import random
-
-def check_guess(guess, word_to_guess):
-    output=''
-    for l in guess:
-        if (l in word_to_guess):
-          if word_to_guess.index(l) == guess.index(l):
-                output+="g"
-          else:
-              output+="y"
-        else:
-             output+="b"
-    return output
-
 def badLetters(result, guess):
     """Finds incorrect letters in word"""
     bad_letters = []
@@ -147,26 +133,24 @@ def bestWord(possible_words, frequencies):
         if scores[w] < max_score:
             max_score = scores[w]
             best_word = w
-    return best_word 
+    return best_word
 
 def wordleSolver(possible_words):
     """Prompts you to solve Wordle"""
-    index = random.randrange(0,len(possible_words))
-    word_to_guess=possible_words[index]
     print("Welcome to the Wordle Solver!")
-    print("The suggested starting word is:", bestWord
-    (possible_words, letterFreq(possible_words)))
+    print("The suggested starting word is:", bestWord(possible_words, letterFreq(possible_words)))
     from datetime import date
     diff = (date.today() - date(2021, 6, 19)).days
     del possible_words[0: diff]
+    #print(possible_words)
     print("Enter your first guess: slate")
     guess = "slate"
     print("Enter your first result:")
-    result = check_guess(guess,word_to_guess)
-    print(result)
+    result = input()
     counter = 1
     while result != "ggggg" and counter < 6:
         possible_words = word_remover(result, guess, possible_words)
+        print(possible_words)
         if len(possible_words) == 0:
             break
         suggestion = bestWord(possible_words, letterFreq(possible_words))
@@ -175,9 +159,7 @@ def wordleSolver(possible_words):
         guess = suggestion
         possible_words.remove(guess)
         print("Enter your new result:")
-        result = check_guess(guess,word_to_guess)
-        print(result)
-        print(len(possible_words))
+        result = input()
         counter += 1
     if len(possible_words) == 0:
         print("Oh no! You made a mistake entering one of your results. Please try again.")
