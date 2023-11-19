@@ -1,5 +1,5 @@
 # Wordle Solver Bot
-(image)
+<img width="300" src="https://github.com/ColeCurrent/Wordle-Bot/blob/main/wordleBot.png">
 
 
 ## What Is It??
