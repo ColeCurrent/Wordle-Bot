@@ -71,6 +71,9 @@ const WordleGame = () => {
       } else if (targetWord.includes(guessWord[i])) {
         newMatchedLetters[i] = 'yellow';
       }
+      else{
+        newMatchedLetters[i] = 'gray';
+      }
     }
 
     return newMatchedLetters;
@@ -93,12 +96,11 @@ const WordleGame = () => {
       <div className="player-game">
   <h1>Player's Game</h1>
   {userPreviousGuesses.length > 0 && (
-    <div>
-      <h2>Your Guesses:</h2>
-      <ul>
+    <div> 
+      <p>
         {userPreviousGuesses.map((prevGuess, index) => (
-          <li key={index}>
-            <p>
+          <p key={index}>
+            <h1>
               {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
                 <span
                   key={idx}
@@ -107,10 +109,10 @@ const WordleGame = () => {
                   {letter}
                 </span>
               ))}
-            </p>
-          </li>
+            </h1>
+          </p>
         ))}
-      </ul>
+      </p>
     </div>
   )}
   <input
@@ -124,23 +126,33 @@ const WordleGame = () => {
   <button onClick={handleGuess} disabled={gameOver}>
     Guess
   </button>
+
+  <button onClick={resetGame} disabled={gameOver} id="Reset_Button">
+    Reset Game
+  </button>
+
   {gameOver && (
     <p className="game-over">
+
       {userPreviousGuesses[userPreviousGuesses.length - 1].feedback.every(matched => matched === 'green')
         ? 'You guessed the word!'
         : 'You lost!'} The word was: {TARGET_WORD.toUpperCase()}
     </p>
   )}
+
+
+
+
+
 </div>
         <div className="bot-game">
           <h1>Bot's Game</h1>
           {botPreviousGuesses.length > 0 && (
             <div>
-              <h2>Bot's Guesses:</h2>
-              <ul>
+              <p>
                 {botPreviousGuesses.map((prevGuess, index) => (
-                  <li key={index}>
-                    <p>
+                  <p key={index}>
+                    <h1>
                       {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
                         <span
                           key={idx}
@@ -149,10 +161,10 @@ const WordleGame = () => {
                           {letter}
                         </span>
                       ))}
-                    </p>
-                  </li>
+                    </h1>
+                  </p>
                 ))}
-              </ul>
+              </p>
             </div>
           )}
           {/* Attempts, Game over message for bot */}
