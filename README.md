@@ -1,9 +1,9 @@
 # Wordle Solver Bot
-<img align="center" width="300" src="https://github.com/ColeCurrent/Wordle-Bot/blob/main/wordleBot.png">
+<p align="center">
+  <img width="400" src="https://github.com/ColeCurrent/Wordle-Bot/blob/main/wordleBot.png">
+</p>
 
-
-## What Is It??
-Could you beat the Wordle bot? Compete against a bot specialized to complete the wordle as optimally as possible. Are you better than
+####Could you beat the Wordle bot? Compete against a bot specialized to complete the wordle as optimally as possible. Are you better than
 
 ## Get Playing!
 
@@ -13,8 +13,7 @@ Could you beat the Wordle bot? Compete against a bot specialized to complete the
   - Record how many times each letter is used in the dataset
   - Pick the top 5 most used letters
   - Create a list of words containing all 5 of those words
-  - Pick a random word from the filtered list
-  <br>
+  - Pick a random word from the filtered list  
 (*wordle returns a list of complete match (green), and partial match(yellow)*)
 * Part-2: Calculate the most optimal next guess
   - Create a filtered list of words containing green letters and yellow letters based off of the wordle game feedback
@@ -37,8 +36,8 @@ Currently, two official plugins are available:
 
 
 ### Credits
-[@SAADMAN-N](https://github.com/SAADMAN-N) 
-[@ColeCurrent](https://github.com/ColeCurrent)
-[@amoitra1](https://github.com/amoitra1)
-[@SARRAF-5757](https://github.com/SARRAF-5757)
+[@SAADMAN-N](https://github.com/SAADMAN-N)  
+[@ColeCurrent](https://github.com/ColeCurrent)  
+[@amoitra1](https://github.com/amoitra1)  
+[@SARRAF-5757](https://github.com/SARRAF-5757)  
 
