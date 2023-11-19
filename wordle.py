@@ -2,7 +2,7 @@ def badLetters(result, guess):
     """Finds incorrect letters in word"""
     bad_letters = []
     for i in range(0, 5):
-        if result[i] == "w":
+        if result[i] == "b":
             bad_letters.append(guess[i])
     return bad_letters
 
@@ -143,8 +143,8 @@ def wordleSolver(possible_words):
     diff = (date.today() - date(2021, 6, 19)).days
     del possible_words[0: diff]
     #print(possible_words)
-    print("Enter your first guess:")
-    guess = input()
+    print("Enter your first guess: slate")
+    guess = "slate"
     print("Enter your first result:")
     result = input()
     counter = 1
@@ -155,8 +155,9 @@ def wordleSolver(possible_words):
             break
         suggestion = bestWord(possible_words, letterFreq(possible_words))
         print("The suggested word is:", suggestion)
-        print("Enter your next guess:")
-        guess = input()
+        #print("Enter your next guess:")
+        guess = suggestion
+        possible_words.remove(guess)
         print("Enter your new result:")
         result = input()
         counter += 1
