@@ -22,11 +22,10 @@ const WordleGame = () => {
       .catch(error => console.error(error));
   }, []);
 
-  // lowercase
   const handleInputChange = (event) => {
     setGuess(event.target.value.trim().toLowerCase().substr(0, 5));
   };
-  
+
   const handleGuess = () => {
     if (!wordList.includes(guess) || guess.length !== 5 || gameOver) return;
 
@@ -36,6 +35,7 @@ const WordleGame = () => {
     const newMatchedLetters = checkMatchedLetters(guess, TARGET_WORD);
 
     setUserPreviousGuesses(prevGuesses => [...prevGuesses, { guess, feedback: newMatchedLetters }]);
+    setGuess('');
 
     if (newMatchedLetters.every(matched => matched === 'green') || newAttempts === 6) {
       setGameOver(true);
@@ -88,65 +88,77 @@ const WordleGame = () => {
 
   return (
     <div className="wordle-game-container">
+      <h1 className="wordle-header">CompetitiveWordle</h1>
+      <div className="game-container">
       <div className="player-game">
-        <h1>Wordle</h1>
-        <p>Attempts: {attempts}</p>
-        {userPreviousGuesses.length > 0 && (
-          <div>
-            <h2>Your Previous Guesses:</h2>
-            <ul>
-              {userPreviousGuesses.map((prevGuess, index) => (
-                <li key={index}>
-                  {prevGuess.guess.toUpperCase()} - {prevGuess.feedback.join(', ')}
-                </li>
+  <h1>Player's Game</h1>
+  {userPreviousGuesses.length > 0 && (
+    <div>
+      <h2>Your Guesses:</h2>
+      <ul>
+        {userPreviousGuesses.map((prevGuess, index) => (
+          <li key={index}>
+            <p>
+              {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
+                <span
+                  key={idx}
+                  className={prevGuess.feedback[idx]} // Apply the class based on feedback color
+                >
+                  {letter}
+                </span>
               ))}
-            </ul>
-          </div>
-        )}
-        <input
-          type="text"
-          maxLength={5}
-          value={guess}
-          onChange={handleInputChange}
-          disabled={gameOver}
-        />
-        <button onClick={handleGuess} disabled={gameOver}>
-          Guess
-        </button>
-        {gameOver && (
-          <p className="game-over">
-            {userPreviousGuesses[userPreviousGuesses.length - 1].feedback.every(matched => matched === 'green')
-              ? 'You guessed the word!'
-              : 'You lost!'} The word was: {TARGET_WORD.toUpperCase()}
-          </p>
-        )}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+  <input
+    type="text"
+    maxLength={5}
+    value={guess}
+    onChange={handleInputChange}
+    disabled={gameOver}
+  />
+  <p>Attempts: {attempts}</p>
+  <button onClick={handleGuess} disabled={gameOver}>
+    Guess
+  </button>
+  {gameOver && (
+    <p className="game-over">
+      {userPreviousGuesses[userPreviousGuesses.length - 1].feedback.every(matched => matched === 'green')
+        ? 'You guessed the word!'
+        : 'You lost!'} The word was: {TARGET_WORD.toUpperCase()}
+    </p>
+  )}
+</div>
+        <div className="bot-game">
+          <h1>Bot's Game</h1>
+          {botPreviousGuesses.length > 0 && (
+            <div>
+              <h2>Bot's Guesses:</h2>
+              <ul>
+                {botPreviousGuesses.map((prevGuess, index) => (
+                  <li key={index}>
+                    <p>
+                      {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
+                        <span
+                          key={idx}
+                          className={prevGuess.feedback[idx]} // Apply the class based on feedback color
+                        >
+                          {letter}
+                        </span>
+                      ))}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {/* Attempts, Game over message for bot */}
+        </div>
       </div>
-      <div className="bot-game">
-        <h1>Bot's Game</h1>
-        <p>Attempts: {attempts}</p>
-        {botPreviousGuesses.length > 0 && (
-          <div>
-            <h2>Bot's Previous Guesses:</h2>
-            <ul>
-              {botPreviousGuesses.map((prevGuess, index) => (
-                <li key={index}>
-                  {prevGuess.guess.toUpperCase()} - {prevGuess.feedback.join(', ')}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {gameOver && (
-          <p className="game-over">
-            {botPreviousGuesses[botPreviousGuesses.length - 1].feedback.every(matched => matched === 'green')
-              ? 'Bot guessed the word!'
-              : 'Bot lost!'} The word was: {TARGET_WORD.toUpperCase()}
-          </p>
-        )}
-      </div>
-      <button onClick={resetGame} className="reset-button">
-        Reset Game
-      </button>
+      {/* Reset Game button */}
     </div>
   );
 };
