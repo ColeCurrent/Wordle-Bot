@@ -14,23 +14,46 @@ body {
   padding: 2rem;
 }
 
-
-
 h1 {
   margin-bottom: 2rem;
 }
 
-.mode-selection {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.game-container {
+.wordle-game-container {
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
-  flex-wrap: wrap;
   gap: 2rem;
+}
+
+.player-game,
+.bot-game {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.player-game {
+  background-color: #f0f0f0;
+}
+
+.bot-game {
+  background-color: #e0e0e0;
+}
+
+.previous-guess {
+  margin-bottom: 1.5rem;
+}
+
+.previous-guess ul {
+  padding: 0;
+  list-style-type: none;
+}
+
+.previous-guess ul li {
+  margin-bottom: 0.5rem;
+}
+
+.reset-button {
+  margin-top: 1rem;
 }
