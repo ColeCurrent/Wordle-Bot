@@ -1,5 +1,5 @@
 # Wordle Solver Bot
-<img width="300" src="https://github.com/ColeCurrent/Wordle-Bot/blob/main/wordleBot.png">
+<img align="center" width="300" src="https://github.com/ColeCurrent/Wordle-Bot/blob/main/wordleBot.png">
 
 
 ## What Is It??
@@ -8,14 +8,15 @@ Could you beat the Wordle bot? Compete against a bot specialized to complete the
 ## Get Playing!
 
 ## How It Works
-* Part1: Find a good starter word
+* Part-1: Find a good starter word
   - Analyze a dataset of all possible 5-letter words used by Wordle
   - Record how many times each letter is used in the dataset
   - Pick the top 5 most used letters
   - Create a list of words containing all 5 of those words
   - Pick a random word from the filtered list
+  <br>
 (*wordle returns a list of complete match (green), and partial match(yellow)*)
-* Part2: Calculate the most optimal next guess
+* Part-2: Calculate the most optimal next guess
   - Create a filtered list of words containing green letters and yellow letters based off of the wordle game feedback
     - Remove all words that don't contain the complete match letters in the exact indeces
     - Remove all words that don't contain the partial matches at all
@@ -36,7 +37,8 @@ Currently, two official plugins are available:
 
 
 ### Credits
-@SAADMAN-N
-@ColeCurrent
-@amoitra1
-@SARRAF-5757
+[@SAADMAN-N](https://github.com/SAADMAN-N) 
+[@ColeCurrent](https://github.com/ColeCurrent)
+[@amoitra1](https://github.com/amoitra1)
+[@SARRAF-5757](https://github.com/SARRAF-5757)
+
