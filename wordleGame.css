@@ -1,0 +1,48 @@
+/* App container */
+.wordle-game {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+/* Word display */
+.word-display {
+  display: flex;
+  margin-bottom: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Individual letters */
+.letter {
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  line-height: 1.5em;
+  text-align: center;
+  font-size: 1em;
+  margin: 0 0.3em;
+  border: 1px solid #000;
+  border-radius: 0.2em;
+}
+
+/* Letter colors */
+.letter.green {
+  background-color: rgb(0, 255, 0);
+}
+
+.letter.yellow {
+  background-color: rgb(255, 255, 0);
+}
+
+.letter.gray {
+  background-color: rgb(63, 62, 62);
+}
+
+/* Game over message */
+.game-over {
+  font-weight: bold;
+  margin-top: 1rem;
+}
