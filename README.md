@@ -3,9 +3,8 @@
   <img width="400" src="https://github.com/ColeCurrent/Wordle-Bot/blob/main/wordleBot.png">
 </p>
 
-####Could you beat the Wordle bot? Compete against a bot specialized to complete the wordle as optimally as possible. Are you better than
+Could you beat the Wordle bot? Compete against a bot specialized to complete the wordle as optimally as possible. Are you better than
 
-## Get Playing!
 
 ## How It Works
 * Part-1: Find a good starter word
