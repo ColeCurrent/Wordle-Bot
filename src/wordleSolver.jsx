@@ -1,3 +1,6 @@
+// This code will not be used in the final version.
+// The python file will be what is used
+
 function badLetters(result, guess) {
   const bad_letters = [];
   for (let i = 0; i < 5; i++) {
