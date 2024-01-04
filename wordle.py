@@ -13,7 +13,6 @@ CORS(app)
 # Route for seeing a data  TEST
 @app.route('/api/data')
 def get_time():
-    
     # Returning an api for showing in  reactjs
     return {
         'Name':"geek", 
@@ -32,12 +31,11 @@ def read_words_from_file():
 
 # puts possible words text file into array
 possible_words = read_words_from_file()
-counter = 0 
+
 
 # Send info
 @app.route('/api/start', methods=['POST', 'OPTIONS'])
 def start_wordle():
-
     # Process the initial request and return the suggested starting word
     # You can call your existing logic or functions here
     suggested_word = "slate" #in future use first word function bestWord(possible_words, letterFreq(possible_words))
@@ -50,19 +48,29 @@ def start_wordle():
 def process_guess():
     # Process the guess sent from the React app and return the next guess
     # You can call your existing logic or functions here
-    counter += 1
     current_guess = request.json.get('currentGuess')
 
     if current_guess == "ggggg": 
         return "you win!"
-    elif counter == 5:
+    elif 1 == 5:
         return "you lose :("
     else:
-        next_guess = "next_guess"  # Replace with your actual logic
+        next_guess = "plate"  # Replace with your actual logic
 
 
     return jsonify({"nextGuess": next_guess})
 
+
+
+
+"""
+if currentGuess == "":
+    best starter word function
+else:
+    testWordleSolver(currentGuess)
+
+
+"""
 
 
 #TESTING ABOVE

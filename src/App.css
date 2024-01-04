@@ -126,13 +126,13 @@
 
 .bot-game .green{
   background-color: green; /* Green background */
-  color: green;
+  color: black;
 }
 .bot-game .gray {
   background-color: rgb(147, 147, 147); /* Gray background */
-  color: rgb(147, 147, 147);
+  color: black;
 }
 .bot-game .yellow {
   background-color: yellow; /* Yellow background */
-  color: yellow;
+  color: black;
 }
