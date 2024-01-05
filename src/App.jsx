@@ -46,7 +46,7 @@ const WordleGame = () => {
   const [botPreviousGuesses, setBotPreviousGuesses] = useState([]);
   const [gameOver, setGameOver] = useState(false);
   const [suggestedWord, setSuggestedWord] = useState("NA");
-  const [botColor, setBotColor] = useState("   ");
+  const [botColor, setBotColor] = useState("bbbbb");
   
   const [data, setdata] = useState({
     name: "",
@@ -142,7 +142,7 @@ const WordleGame = () => {
       botGuessedWord = suggestedWord;
     } else {
       console.log("PROCESS GUESS")
-      processBotGuess(botPreviousGuesses);
+      processBotGuess(botPreviousGuesses, botColor);
       botGuessedWord = suggestedWord;
     }
 
@@ -231,9 +231,9 @@ const WordleGame = () => {
     }
   };
 
-  const processBotGuess = async (currentGuess) => {
+  const processBotGuess = async (currentGuess, letterColors) => {
     try {
-      const response = await sendRequest('/api/guess', { currentGuess });
+      const response = await sendRequest('/api/guess', { currentGuess, letterColors });
       const nextGuess = response.nextGuess;
 
       setSuggestedWord(nextGuess);

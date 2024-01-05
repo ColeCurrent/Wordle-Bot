@@ -46,34 +46,38 @@ def start_wordle():
 # Recieve info 
 @app.route('/api/guess', methods=['POST'])
 def process_guess():
+    # Use global version of possible_words to prevent decleration 
+    global possible_words
+
+
     # Process the guess sent from the React app and return the next guess
     # You can call your existing logic or functions here
     current_guess = request.json.get('currentGuess')
-
-    if current_guess == "ggggg": 
-        return "you win!"
-    elif 1 == 5:
-        return "you lose :("
-    else:
-        next_guess = "plate"  # Replace with your actual logic
+    letter_colors = request.json.get('letterColors')
 
 
-    return jsonify({"nextGuess": next_guess})
+    possible_words = word_remover(letter_colors, current_guess, possible_words)
+    print(possible_words)
+
+    # print(possible_words)
+    
+    suggestion = bestWord(possible_words, letterFreq(possible_words))
+
+    #print("The suggested word is:", suggestion)
+    #print("Enter your next guess:")
+
+    possible_words.remove(suggestion)
+
+    return jsonify({"nextGuess": suggestion})
 
 
 
 
 """
-if currentGuess == "":
-    best starter word function
-else:
-    testWordleSolver(currentGuess)
+API ABOVE 
 
-
+WORDLE ALGORITHM BELOW
 """
-
-
-#TESTING ABOVE
 
 
 
@@ -82,7 +86,8 @@ def badLetters(result, guess):
     """Finds incorrect letters in word"""
     bad_letters = []
     for i in range(0, 5):
-        if result[i] == "b":
+        if (i < len(guess)) and (isinstance(result[i], str)) and (result[i] == "b"):
+            print(f"i: {i}, len(result): {len(result)}, len(guess): {len(guess)}")
             bad_letters.append(guess[i])
     return bad_letters
 
@@ -91,7 +96,7 @@ def partialLetters(result, guess):
     """Finds correct letters that are misplaced in word"""
     partial_letters = []
     for i in range(0, 5):
-        if result[i] == "y":
+        if (i < len(guess)) and (isinstance(result[i], str)) and result[i] == "y":
             partial_letters.append([guess[i], i])
     return partial_letters
 
@@ -100,7 +105,7 @@ def correctLetters(result, guess):
     """Finds fully correct letters in word"""
     correct_letters = []
     for i in range(0, 5):
-        if result[i] == "g":
+        if (i < len(guess)) and (isinstance(result[i], str)) and result[i] == "g":
             correct_letters.append([guess[i], i])
     return correct_letters
 
@@ -120,7 +125,7 @@ def word_remover(result, guess, possible_words):
     for w in possible_words:
         check = 0
         for b in bad_letters:
-            if b in w:
+            if isinstance(b, str) and b in w:
                 if b in good_letters:
                     pass
                 else:
@@ -156,7 +161,7 @@ def word_remover(result, guess, possible_words):
     for w in acceptable_words3:
         check = 0
         for g in good_letters:
-            if g not in w:
+            if isinstance(b, str) and g not in w:
                 check = 1
                 break
         if check == 0:
