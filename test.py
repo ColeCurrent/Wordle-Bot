@@ -11,6 +11,8 @@ def badLetters(result, guess):
 def partialLetters(result, guess):
     """Finds correct letters that are misplaced in word"""
     partial_letters = []
+    print("result: ", result)
+    print("guess: ", guess)
     for i in range(0, 5):
         if result[i] == "y":
             partial_letters.append([guess[i], i])
@@ -28,7 +30,9 @@ def word_remover(result, guess, possible_words):
     """Returns the list of words with incorrect possibilties removed"""
     bad_letters = badLetters(result, guess)
     correct_letters = correctLetters(result, guess)
+    print("correct: ", correct_letters)
     partial_letters = partialLetters(result, guess)
+    print("partial_letters: ", partial_letters)
     good_letters = []
     for g in correct_letters:
         good_letters.append(g[0])
@@ -92,6 +96,7 @@ def word_remover(result, guess, possible_words):
                     break
         if check == 0:
             acceptable_words5.append(w)
+
     
     return acceptable_words5
 

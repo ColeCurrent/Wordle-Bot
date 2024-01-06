@@ -255,6 +255,12 @@ const WordleGame = () => {
 
         <div className="player-game">
           <h1>Player's Game</h1>
+
+          {/* TEMP */}
+          <button onClick={() => { setGuess('slate'); handlePlayerGuess(); }} disabled={gameOver}>
+            slate
+          </button>
+
           {userPreviousGuesses.length > 0 && (
             <div> 
               <p>
@@ -284,6 +290,8 @@ const WordleGame = () => {
             onChange={handleInputChange}
             disabled={gameOver}
           />
+
+
           <p>Attempts: {attempts}</p>
           <button onClick={handlePlayerGuess} disabled={gameOver}>
             Guess
@@ -307,6 +315,9 @@ const WordleGame = () => {
 
         <div className="bot-game">
           <h1>Bot's Game</h1>
+
+          <h2 className="player-game">ANSWER: {TARGET_WORD}</h2>
+
           {botPreviousGuesses.length > 0 && (
             <div>
               <p>
@@ -328,6 +339,7 @@ const WordleGame = () => {
             </div>
           )}
           {/* Attempts, Game over message for bot */}
+
         </div>
 
 
