@@ -41,9 +41,8 @@ def start_wordle():
 
     # Process the initial request and return the suggested starting word
     # You can call your existing logic or functions here
-    suggested_word = "slate" #in future use first word function bestWord(possible_words, letterFreq(possible_words))
+    suggested_word = "irate" #in future use first word function bestWord(possible_words, letterFreq(possible_words))
     return jsonify({"suggestedWord": suggested_word})
-
 
 
 # Recieve info 
@@ -102,8 +101,6 @@ def badLetters(result, guess):
 def partialLetters(result, guess):
     """Finds correct letters that are misplaced in word"""
     partial_letters = []
-    print("result: ", result)
-    print("guess: ", guess)
     for i in range(0, 5):
         if result[i] == "y":
             partial_letters.append([guess[i], i])
@@ -198,12 +195,12 @@ def word_remover(result, guess):
             acceptable_words5.append(w)
 
 
-    print("acceptable words 5: ", len(acceptable_words5))
+    print("acceptable words 5 length: ", len(acceptable_words5))
 
     # Update the global variable with the filtered list
 
     possible_words = acceptable_words5
-    print("possible_words after: ", len(possible_words))
+    print("possible_words after length: ", len(possible_words))
 
     return acceptable_words5
 

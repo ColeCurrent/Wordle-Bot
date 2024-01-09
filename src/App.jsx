@@ -144,6 +144,7 @@ const WordleGame = () => {
       console.log("PROCESS GUESS")
       processBotGuess(botPreviousGuesses, botColor);
       botGuessedWord = suggestedWord;
+      console.log("botGuessedWord: ", botGuessedWord)
     }
 
 
@@ -151,6 +152,14 @@ const WordleGame = () => {
     setAttempts(newAttempts);
 
     const newBotMatchedLetters = checkMatchedLetters(botGuessedWord);
+
+    
+    // Log the current guess information
+    console.log('Bot Guess:', {
+      guess: botGuessedWord,
+      feedback: newBotMatchedLetters
+    });
+
 
     // Update previous guess with current guess + feedback
     setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]);
@@ -231,12 +240,19 @@ const WordleGame = () => {
     }
   };
 
+  
+
   const processBotGuess = async (currentGuess, letterColors) => {
     try {
       const response = await sendRequest('/api/guess', { currentGuess, letterColors });
       const nextGuess = response.nextGuess;
 
+      console.log("next guess:", nextGuess)
+
       setSuggestedWord(nextGuess);
+
+      console.log("suggested word: ", suggestedWord);
+
       // Use nextGuess in your React component
     } catch (error) {
       console.error('Error processing guess:', error);
