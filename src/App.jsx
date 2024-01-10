@@ -3,21 +3,29 @@ import "./App.css";
 
 
 // Send info to Flask API
-const sendRequest = async (endpoint, data) => {
+const sendRequest = async (endpoint, data, callback = null) => {
+  try {
+    const response = await fetch(`http://localhost:5173${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-  const response = await fetch(`http://localhost:5173${endpoint}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
 
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
+    const responseData = await response.json();
+    if (callback && typeof callback === 'function') {
+      callback(responseData);
+    }
+    return responseData;
+  } catch (error) {
+    console.error('Error in sendRequest:', error);
+    throw error; // rethrow the error for further handling if needed
   }
-
-  return response.json();
 };
 
 // Returns a string representation of the feedback colors
@@ -45,7 +53,7 @@ const WordleGame = () => {
   const [userPreviousGuesses, setUserPreviousGuesses] = useState([]);
   const [botPreviousGuesses, setBotPreviousGuesses] = useState([]);
   const [gameOver, setGameOver] = useState(false);
-  const [suggestedWord, setSuggestedWord] = useState("NA");
+  const [suggestedWord, setSuggestedWord] = useState("");
   const [botColor, setBotColor] = useState("bbbbb");
   
   const [data, setdata] = useState({
@@ -80,7 +88,7 @@ const WordleGame = () => {
         })
       );
 
-      startWordle();
+      // startWordle();
   }, []);
   
   // Sets random target word
@@ -100,6 +108,7 @@ const WordleGame = () => {
     .catch(error => console.error("Error fetching word list:", error));
   }, []);
   
+
 
   // User input
   const handleInputChange = (event) => {
@@ -130,52 +139,104 @@ const WordleGame = () => {
     }
   };
 
+
+
   // Makes Bot Guess
-  const handleBotGuess = () => {
+  const handleBotGuess = async () => {
     if (gameOver) return;
-
-    let botGuessedWord = suggestedWord;
-
-    if (botPreviousGuesses.length === 0) {
-      console.log("START WORDLE")
-      startWordle();
-      botGuessedWord = suggestedWord;
-    } else {
-      console.log("PROCESS GUESS")
-      processBotGuess(botPreviousGuesses, botColor);
-      botGuessedWord = suggestedWord;
-      console.log("botGuessedWord: ", botGuessedWord)
-    }
-
 
     const newAttempts = attempts + 1;
     setAttempts(newAttempts);
 
-    const newBotMatchedLetters = checkMatchedLetters(botGuessedWord);
+    console.log("newAttempts: ", newAttempts)
 
+    if (newAttempts === 1) {
+      console.log("START WORDLE");
+      
+      const suggestedWord = await startWordle(); // Await the suggested word
+      makeBotGuess(suggestedWord);
+
+    } else {
+      console.log("PROCESS GUESS")
+      
+      console.log("botPreviousGuesses: ", botPreviousGuesses)
+
+      processBotGuess(botPreviousGuesses, botColor, () => {});
+
+      // This code will execute after `suggestedWord` is updated
+      makeBotGuess(suggestedWord);
+
+
+      console.log("botPreviousGuesses2: ", botPreviousGuesses)
+      console.log("Suggested Word Processed: ", suggestedWord)
+    }
+
+  };
+
+  const makeBotGuess = (botGuessedWord) => {
+    // Check matched letters for the bot's guess
+    const newBotMatchedLetters = checkMatchedLetters(botGuessedWord);
     
+    console.log("makeBotGuess is running")
+
+
     // Log the current guess information
     console.log('Bot Guess:', {
       guess: botGuessedWord,
       feedback: newBotMatchedLetters
     });
-
-
-    // Update previous guess with current guess + feedback
+  
+    // Update previous guesses with the current guess and feedback
     setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]);
 
+    console.log("botPreviousGuesses3: ", botPreviousGuesses)
 
-    // Checks if bot won
-    if (newBotMatchedLetters.every(matched => matched === 'green') || newAttempts === 6) {
+    // Check if the bot has won or if the game is over due to maximum attempts reached
+    if (newBotMatchedLetters.every(matched => matched === 'green') || attempts >= 6) {
       setGameOver(true);
+      // Additional logic if needed when the game is over
+      console.log('Game Over. Bot guessed the word or max attempts reached.');
+    } else {
+      // Prepare for the next turn
+      setBotColor(getFeedbackString(newBotMatchedLetters));
+      // Any additional logic for setting up the next turn
     }
-
-
-    // Convert feedback colors to string and store in botColor
-    setBotColor("");
-    const botFeedbackString = getFeedbackString(newBotMatchedLetters);
-    setBotColor(prevColor => prevColor + botFeedbackString);
   };
+
+  // Grab bots starter guess from backend
+  const startWordle = async () => {
+    try {
+      console.log("/api/start");
+      const response = await fetch("http://localhost:5173/api/start", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      return data.suggestedWord; // Return the suggested word from the response
+    } catch (error) {
+      console.error('Error starting Wordle:', error);
+      return ""; // Return an empty string or handle the error appropriately
+    }
+  };
+  
+
+  // Grab bots calculated guess from backend
+  const processBotGuess = async (currentGuess, letterColors) => {
+    try {
+
+      console.log("/api/guess")
+
+      sendRequest('/api/guess', { currentGuess, letterColors }, (response) => {
+        
+        // Grabs return of optimal word from process_guess()
+        setSuggestedWord(response.nextGuess);
+        
+      });
+    } catch (error) {
+      console.error('Error processing guess:', error);
+    }
+  };
+  
 
 
   // Handle Enter key press
@@ -212,7 +273,6 @@ const WordleGame = () => {
     return newMatchedLetters;
   };
 
-
   // Resets game
   const resetGame = () => {
     setGuess('');
@@ -222,41 +282,6 @@ const WordleGame = () => {
     setBotPreviousGuesses([]);
     const randomIndex = Math.floor(Math.random() * wordList.length);
     setTargetWord(wordList[randomIndex]);
-  };
-
-
-  // Grab guess from backend
-  const startWordle = async () => {
-    try {
-      // Send request to '/api/start/'
-      const response = await sendRequest('/api/start', {});
-
-      // const suggestedWord = response.suggestedWord;
-      setSuggestedWord(response.suggestedWord);
-      // Use suggestedWord in your React component
-
-    } catch (error) {
-      console.error('Error starting Wordle:', error);
-    }
-  };
-
-  
-
-  const processBotGuess = async (currentGuess, letterColors) => {
-    try {
-      const response = await sendRequest('/api/guess', { currentGuess, letterColors });
-      const nextGuess = response.nextGuess;
-
-      console.log("next guess:", nextGuess)
-
-      setSuggestedWord(nextGuess);
-
-      console.log("suggested word: ", suggestedWord);
-
-      // Use nextGuess in your React component
-    } catch (error) {
-      console.error('Error processing guess:', error);
-    }
   };
 
 
@@ -278,24 +303,21 @@ const WordleGame = () => {
           </button>
 
           {userPreviousGuesses.length > 0 && (
-            <div> 
-              <p>
-                {userPreviousGuesses.map((prevGuess, index) => (
-                  <p key={index}>
-                    <h1>
-                      {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
-
-                        <span
-                          key={idx}
-                          className={prevGuess.feedback[idx]} // Apply the class based on feedback color
-                        >
-                          {letter}
-                        </span>
-                      ))}
-                    </h1>
-                  </p>
-                ))}
-              </p>
+            <div>
+              {userPreviousGuesses.map((prevGuess, index) => (
+                <div key={index}> {/* Change this from <p> to <div> */}
+                  <h1> {/* This is fine as it's directly inside a <div> */}
+                    {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
+                      <span
+                        key={idx}
+                        className={prevGuess.feedback[idx]} // Apply the class based on feedback color
+                      >
+                        {letter}
+                      </span>
+                    ))}
+                  </h1>
+                </div>
+              ))}
             </div>
           )}
 
@@ -336,22 +358,20 @@ const WordleGame = () => {
 
           {botPreviousGuesses.length > 0 && (
             <div>
-              <p>
-                {botPreviousGuesses.map((prevGuess, index) => (
-                  <p key={index}>
-                    <h1>
-                      {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
-                        <span
-                          key={idx}
-                          className={prevGuess.feedback[idx]} // Apply the class based on feedback color
-                        >
-                          {letter}
-                        </span>
-                      ))}
-                    </h1>
-                  </p>
-                ))}
-              </p>
+              {botPreviousGuesses.map((prevGuess, index) => (
+                <div key={index}> {/* Change this from <p> to <div> */}
+                  <h1> {/* This is fine as it's directly inside a <div> */}
+                    {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
+                      <span
+                        key={idx}
+                        className={prevGuess.feedback[idx]} // Apply the class based on feedback color
+                      >
+                        {letter}
+                      </span>
+                    ))}
+                  </h1>
+                </div>
+              ))}
             </div>
           )}
           {/* Attempts, Game over message for bot */}

@@ -29,19 +29,24 @@ def read_words_from_file():
 
     return words_array
 
+
+
 # puts possible words text file into array
 possible_words = read_words_from_file()
 
+counter = 0
 
 # Send info
 @app.route('/api/start', methods=['POST', 'OPTIONS'])
 def start_wordle():
     global possible_words
     possible_words = read_words_from_file()
+    # print("POSSIBLE WORDS LEN: ", len(possible_words))
 
     # Process the initial request and return the suggested starting word
     # You can call your existing logic or functions here
     suggested_word = "irate" #in future use first word function bestWord(possible_words, letterFreq(possible_words))
+    print("Returned suggested_word: ", suggested_word)
     return jsonify({"suggestedWord": suggested_word})
 
 
@@ -51,6 +56,8 @@ def process_guess():
     # Use global version of possible_words to prevent decleration 
     global possible_words
 
+    print("POSSIBLE WORDS LEN: ", len(possible_words))
+
 
     # Process the guess sent from the React app and return the next guess
     # You can call your existing logic or functions here
@@ -58,8 +65,6 @@ def process_guess():
     print("current_guess: ", current_guess)
     letter_colors = request.json.get('letterColors')
     print("letter_colors: ",letter_colors)
-
-
 
     # Update the global variable with the filtered list
     # print("possible words len: ", possible_words)
@@ -76,6 +81,7 @@ def process_guess():
     # print("possible words: ", possible_words)
 
     return jsonify({"nextGuess": suggestion})
+
 
 
 
@@ -117,92 +123,30 @@ def correctLetters(result, guess):
 
 
 def word_remover(result, guess):
+    # Use global version of possible_words to prevent decleration 
     global possible_words
 
-    print("possible_words before: ", len(possible_words))
+    # Initialize sets for different categories of letters
+    correct_letters = {guess[i] for i in range(5) if result[i] == "g"}
+    misplaced_letters = {guess[i] for i in range(5) if result[i] == "y"}
+    wrong_letters = {guess[i] for i in range(5) if result[i] == "b"}
 
-    """Returns the list of words with incorrect possibilities removed"""
-    bad_letters = badLetters(result, guess)
-    correct_letters = correctLetters(result, guess)
-    # print("correct_letters: ", correct_letters)
-    partial_letters = partialLetters(result, guess)
-    # print("partial_letters: ", partial_letters)
-    good_letters = []
-    for g in correct_letters:
-        good_letters.append(g[0])
-    for p in partial_letters:
-        good_letters.append(p[0])
+    def is_valid_word(word):
+        # Check for correct letters in correct positions
+        if any(result[i] == "g" and word[i] != guess[i] for i in range(5)):
+            return False
+        # Check for presence of misplaced letters (but not in the same position)
+        if any((letter in word and word.index(letter) == guess.index(letter)) for letter in misplaced_letters):
+            return False
+        # Check for absence of wrong letters
+        if any(letter in word for letter in wrong_letters):
+            return False
+        return True
+
+    # Filter the possible words using the validation function
+    filtered_words = [word for word in possible_words if is_valid_word(word)]
     
-    acceptable_words1 = []
-    for w in possible_words:
-        check = 0
-        for b in bad_letters:
-            # if isinstance(b, str) and b in w:
-            if b in w:
-                if b in good_letters:
-                    pass
-                else:
-                    check = 1
-                    break
-        if check == 0:
-            acceptable_words1.append(w)
-
-    acceptable_words2 = []
-    for w in acceptable_words1:
-        check = 0
-        for g in correct_letters:
-            if w[g[1]] != g[0]:
-                check = 1
-                break
-        if check == 0:
-            acceptable_words2.append(w)
-    #print(acceptable_words2)
-    
-    acceptable_words3 = []
-    for w in acceptable_words2:
-        check = 0
-        for p in partial_letters:
-            if w[p[1]] == p[0]:
-                check = 1
-                break
-        if check == 0:
-            acceptable_words3.append(w)
-    #print(acceptable_words3)
-    
-    acceptable_words4 = []
-    for w in acceptable_words3:
-        check = 0
-        for g in good_letters:
-            # if isinstance(g, str) and g not in w:
-            if g not in w:    
-                check = 1
-                break
-        if check == 0:
-            acceptable_words4.append(w)
-    # print("acceptable words4: ", len(acceptable_words4))
-            
-
-    acceptable_words5 = []
-    for w in acceptable_words4:
-        check = 0
-        for b in bad_letters:
-            if b in good_letters:
-                # if isinstance(b, str) and w.count(b) != good_letters.count(b):
-                if w.count(b) != good_letters.count(b):    
-                    check = 1
-                    break
-        if check == 0:
-            acceptable_words5.append(w)
-
-
-    print("acceptable words 5 length: ", len(acceptable_words5))
-
-    # Update the global variable with the filtered list
-
-    possible_words = acceptable_words5
-    print("possible_words after length: ", len(possible_words))
-
-    return acceptable_words5
+    return filtered_words
 
 
 def letterFreq(possible_words):

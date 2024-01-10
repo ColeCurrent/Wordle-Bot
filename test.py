@@ -151,7 +151,7 @@ def wordleSolver(possible_words):
     del possible_words[0: diff]
     #print(possible_words)
     print("Enter your first guess: slate")
-    guess = "slate"
+    guess = "irate"
     print("Enter your first result:")
     result = input()
     counter = 1
