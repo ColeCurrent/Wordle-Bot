@@ -2,6 +2,7 @@
   "name": "wordlebuddy",
   "private": true,
   "version": "0.0.0",
+  "proxy": "http://127.0.0.1:5000",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
