@@ -136,7 +136,6 @@ const thief_wordle = () => {
     }
 
 
-
     function createSquares() {
         const gameBoard = document.getElementById("board");
 
