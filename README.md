@@ -1,6 +1,6 @@
 # Wordle Solver Bot
 <p align="center">
-  <img width="400" src="https://github.com/ColeCurrent/Wordle-Bot.git/public/wordleBot.png" alt="Wordle Logo">
+  <img width="400" src="/public/wordleBot.png" alt="Wordle Logo">
 </p>
 
 Could you beat the Wordle bot? Compete against a bot trained to complete the wordle in the mathematically calculated fastest way possible.
@@ -29,13 +29,19 @@ Could you beat the Wordle bot? Compete against a bot trained to complete the wor
       git clone https://github.com/ColeCurrent/Wordle-Bot.git
     ```
 
-2) Start React Application
+2) Navigate to project directory:
+    * cd into the project directory "Wordle-Bot":
+    ```
+      cd Wordle-Bot
+    ```
+
+3) Start React Application
     * To start the front end, type into the terminal:
     ```
       npm run dev
     ```
 
-3) Run Python backend server
+4) Run Python backend server
     * To start the backend server, type into the terminal:
     ```
       python wordle.py
