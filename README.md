@@ -25,21 +25,21 @@ Could you beat the Wordle bot? Compete against a bot trained to complete the wor
 ## Running Locally
 1) Clone the repository
     * First, clone the project repository to your local machine using Git. Open your terminal, navigate to the directory where you want to clone the repository, and run:
-```
-  git clone https://github.com/ColeCurrent/Wordle-Bot.git
-```
+    ```
+      git clone https://github.com/ColeCurrent/Wordle-Bot.git
+    ```
 
 2) Start React Application
     * To start the front end, type into the terminal:
-```
-  npm run dev
-```
+    ```
+      npm run dev
+    ```
 
 3) Run Python backend server
     * To start the backend server, type into hte terminal:
-```
-  python wordle.py
-```
+    ```
+      python wordle.py
+    ```
 
 
 ## React + Vite
