@@ -12,7 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Header />
     <App />
-    {/* <Steal /> Uncomment if you decide to render Steal here */}
+    <Steal /> 
   </React.StrictMode>
 
 );
