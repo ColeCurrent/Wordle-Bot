@@ -1,25 +1,11 @@
 import random
-from flask import Flask, request, jsonify, make_response
-import datetime
+from flask import Flask, request, jsonify
 from flask_cors import CORS
- 
-x = datetime.datetime.now()
+
  
 # Initializing flask app
 app = Flask(__name__)
 CORS(app)
-
- 
-# Route for seeing a data  TEST
-@app.route('/api/data')
-def get_time():
-    # Returning an api for showing in  reactjs
-    return {
-        'Name':"geek", 
-        "Age":"22",
-        "Date":x, 
-        "programming":"python"
-        }
 
 
 # Input all possible words from file  (extracted from wordle website)
@@ -29,64 +15,52 @@ def read_words_from_file():
 
     return words_array
 
-
-
-# puts possible words text file into array
 possible_words = read_words_from_file()
 
-counter = 0
 
 # Send info
 @app.route('/api/start', methods=['POST', 'OPTIONS'])
 def start_wordle():
+    """
+    Initializes games buy calculating mathematically best starter word
+
+    :route /api/start: From startWordle() on front-end
+    :returns: A JSON object containing calculated starter word
+    """
     global possible_words
     possible_words = read_words_from_file()
-    # print("POSSIBLE WORDS LEN: ", len(possible_words))
 
-    # Process the initial request and return the suggested starting word
-    # You can call your existing logic or functions here
-    suggested_word = "irate" #in future use first word function bestWord(possible_words, letterFreq(possible_words))
-    print("Returned suggested_word: ", suggested_word)
+    # Calculates mathematically best starter word
+    suggested_word = bestWord(possible_words, letterFreq(possible_words))
+
     return jsonify({"suggestedWord": suggested_word})
 
 
 # Recieve info 
 @app.route('/api/guess', methods=['POST'])
 def process_guess():
+    """
+    Calculates best guess given previous guess and color data
+
+    :route /api/guess: From proccessBotGuess on front-end
+    :returns: A JSON object containing next best guess
+    """
+
     # Use global version of possible_words to prevent decleration 
     global possible_words
 
-    print("POSSIBLE WORDS LEN: ", len(possible_words))
-
-
     # Process the guess sent from the React app and return the next guess
-    # You can call your existing logic or functions here
-    current_guess = request.json.get('currentGuess')   # sets guess as one word 5 letter string
-    print("current_guess: ", current_guess)
+    current_guess = request.json.get('currentGuess')  
     letter_colors = request.json.get('letterColors')
 
     # Update the global variable with the filtered list
-    # print("possible words len: ", possible_words)
-    print("letter colors: ", letter_colors)
-    print("current guess: ", current_guess)
     possible_words = word_remover(letter_colors, current_guess)
     
-
     suggestion = bestWord(possible_words, letterFreq(possible_words))
 
-    #print("The suggested word is:", suggestion)
-    #print("Enter your next guess:")
-
-    print("possible words: ", possible_words)
-    print("suggestion: ", suggestion)
     possible_words.remove(suggestion)
-    # print("possible words: ", possible_words)
 
     return jsonify({"nextGuess": suggestion})
-
-
-
-
 
 """
 API ABOVE 
@@ -94,21 +68,29 @@ API ABOVE
 WORDLE ALGORITHM BELOW
 """
 
-
-
-
 def badLetters(result, guess):
-    """Finds incorrect letters in word"""
+    """
+    Finds incorrect letters in word
+
+    :param result: Color feedback in the form "bbybg"
+    :param guess: Previous guess
+    :return: List of all letters associated with "b"
+    """
     bad_letters = []
     for i in range(0, 5):
         if result[i] == "b":
-            bad_letters.append(guess[i])  # Maybe an error? guess[i], i <--  
-            # Partial and correct both have guess[i], i
+            bad_letters.append(guess[i])
     return bad_letters
 
 
 def partialLetters(result, guess):
-    """Finds correct letters that are misplaced in word"""
+    """
+    Finds correct letters that are misplaced in word
+
+    :param result: Color feedback in the form "bbybg"
+    :param guess: Previous guess
+    :return: List of all letters associated with "y"
+    """
     partial_letters = []
     for i in range(0, 5):
         if result[i] == "y":
@@ -117,7 +99,13 @@ def partialLetters(result, guess):
 
 
 def correctLetters(result, guess):
-    """Finds fully correct letters in word"""
+    """
+    Finds fully correct letters in word
+
+    :param result: Color feedback in the form "bbybg"
+    :param guess: Previous guess
+    :return: List of all letters associated with "g"
+    """
     correct_letters = []
     for i in range(0, 5):
         if result[i] == "g":
@@ -134,13 +122,8 @@ def word_remover(result, guess):
     :return: array of filtered words that could be possibility of param result
     """
 
-
-
-
     # Use global version of possible_words to prevent decleration 
     global possible_words
-
-    print("p words in function: ", possible_words)
 
     bad_letters = badLetters(result, guess)  # list
     partial_letters = partialLetters(result, guess)  # tuple (letter, position)
@@ -159,7 +142,6 @@ def word_remover(result, guess):
             bad_letters.remove(letter)
 
 
-    print("bad letters: ", bad_letters)
     no_bad_letters = []
     # Removes words that contain a letter marked "b" in result
     for word in possible_words:
@@ -172,12 +154,9 @@ def word_remover(result, guess):
          
         if acceptable_word is True:
             no_bad_letters.append(word)
-    
-    print("no_bad_letters: ", no_bad_letters)
 
     
     contains_green = []
-    print("correct letters: ", correct_letters)
     # Ensures word has the correct letter in position that aligns with "g" from result
     for word in no_bad_letters:
         acceptable_word = True
@@ -193,8 +172,6 @@ def word_remover(result, guess):
 
         if acceptable_word is True: 
             contains_green.append(word)
-    
-    print("contains_green: ", contains_green)
 
 
     filtered_yellow = []
@@ -212,7 +189,6 @@ def word_remover(result, guess):
 
         if acceptable_word is True:
             filtered_yellow.append(word)
-    print("filtered_yellow: ", filtered_yellow)
 
 
     contains_yellow = []
@@ -228,7 +204,6 @@ def word_remover(result, guess):
         if acceptable_word is True:
             contains_yellow.append(word)
     
-    print("contains_yellow: ", contains_yellow)
         
     
     correct_frequency = []
@@ -243,15 +218,19 @@ def word_remover(result, guess):
 
         if acceptable_word is True:
             correct_frequency.append(word)
-    print("correct_frequency: ", correct_frequency)
         
-    
+
     return correct_frequency
 
 
-
 def letterFreq(possible_words):
-    """Finds frequencies of letters in each position"""
+    """
+    Finds frequencies of letters in each position
+
+    :param possible_words: List of all possible words
+    :return: Dictionary of each letter and its associated frequency in possible words
+    """
+
     alphabet = "abcdefghijklmnopqrstuvwxyz"
     arr = {}
     for c in alphabet:
@@ -265,7 +244,13 @@ def letterFreq(possible_words):
 
 
 def wordScore(possible_words, frequencies):
-    """Computes a score based off letter frequencies"""
+    """
+    Computes a score based off letter frequencies
+
+    :param possible_words: List of all possible words
+    :param frequencies: Dictionary of each letter and its associated frequency in possible words 
+    :return: Score based of letter frequencies
+    """
     words = {}
     max_freq = [0, 0, 0, 0, 0]
 
@@ -287,7 +272,13 @@ def wordScore(possible_words, frequencies):
 
 
 def bestWord(possible_words, frequencies):
-    """Finds the best word"""
+    """
+    Finds the best word
+    
+    :param possible_words: List of all possible words
+    :param frequencies: Dictionary of each letter and its associated frequency in possible words 
+    :return: best calculated word
+    """
     max_score = 1000000000000000000     # start with a ridiculous score
     best_word = "words"     # start with a random word
     scores = wordScore(possible_words, frequencies)
@@ -297,38 +288,6 @@ def bestWord(possible_words, frequencies):
             best_word = w
     return best_word
 
-
-def testWordleSolver(guess):
-
-    while result != "ggggg" and counter < 6:
-        possible_words = word_remover(result, guess, possible_words)
-        #print(possible_words)
-        if len(possible_words) == 0:
-            break
-        suggestion = bestWord(possible_words, letterFreq(possible_words))
-        print("The suggested word is:", suggestion)
-        #print("Enter your next guess:")
-        guess = suggestion
-        possible_words.remove(guess)
-        print("Enter your new result:")
-        result = input()
-        counter += 1
-    if len(possible_words) == 0:
-        print("Oh no! You made a mistake entering one of your results. Please try again.")
-    elif counter == 6 and result != "ggggg":
-        print("Number of guesses exceeded, sorry we failed!")
-    else:
-        print("Congratulations! We solved today's Wordle in", counter, "guesses.")
-
-
-
-        
-# Examples:
-guess = "slate"    # a 5 letter word must be the input
-result = "yywww"   # y - correct letter, wrong place; g - fully correct; w - wrong
-
-
-#wordleSolver(possible_words)
 
 # Running app
 if __name__ == '__main__':
