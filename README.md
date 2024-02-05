@@ -1,6 +1,6 @@
 # Wordle Solver Bot
 <p align="center">
-  <img width="400" src="https://github.com/ColeCurrent/Wordle-Bot/public/wordleBot.png">
+  <img width="400" src="https://github.com/ColeCurrent/Wordle-Bot.git/public/wordleBot.png" alt="Wordle Logo">
 </p>
 
 Could you beat the Wordle bot? Compete against a bot trained to complete the wordle in the mathematically calculated fastest way possible.
@@ -8,7 +8,7 @@ Could you beat the Wordle bot? Compete against a bot trained to complete the wor
 
 ## How It Works
 * Part-1: Find a good starter word
-  - Analyze a dataset of all possible 5-letter words used by Wordle
+  - Analyze a dataset of all possible 5-letter words (extracted from the NYT Wordle nytimes.com/games/wordle/)
   - Record how many times each letter is used in the dataset
   - Pick the top 5 most used letters
   - Create a list of words containing all 5 of those words
@@ -36,7 +36,7 @@ Could you beat the Wordle bot? Compete against a bot trained to complete the wor
     ```
 
 3) Run Python backend server
-    * To start the backend server, type into hte terminal:
+    * To start the backend server, type into the terminal:
     ```
       python wordle.py
     ```
@@ -56,8 +56,8 @@ Currently, two official plugins are available:
 
 
 ### Credits
-[@SAADMAN-N](https://github.com/SAADMAN-N)  
-[@ColeCurrent](https://github.com/ColeCurrent)  
+[@ColeCurrent](https://github.com/ColeCurrent) 
+[@SAADMAN-N](https://github.com/SAADMAN-N)   
 [@amoitra1](https://github.com/amoitra1)  
 [@SARRAF-5757](https://github.com/SARRAF-5757)  
 
