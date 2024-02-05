@@ -294,7 +294,6 @@ const WordleGame = () => {
   // Displays UIs
   return (
     <div className="wordle-game-container">
-      <h1 className="wordle-header">Competitive Wordle</h1>
 
       <div className="game-container">
 

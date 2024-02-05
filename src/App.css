@@ -10,14 +10,6 @@
   min-height: 100vh;
 }
 
-/* Header styles */
-.wordle-header {
-  font-size: 100px;
-  text-align: center;
-  margin-bottom: 15px;
-  margin-top: 30px;
-
-}
 
 /* Game container */
 .game-container {
@@ -30,10 +22,9 @@
 
 /* Player's game styles */
 .player-game {
-  width: 50%; /* Adjust width as needed */
-  background-color: lightblue;
-
+  width: 50%; 
   text-align: center;
+  margin-left: -30px;
 }
 
 .player-game h1 {
@@ -64,8 +55,8 @@
 .bot-game {
   flex: 1;
   width: 100%; /* Adjust width as needed */
-  background-color: lightcoral;
   margin-left: auto;
+  margin-right: -30px;
 }
 
 .bot-game h1 {

@@ -1,5 +1,5 @@
 :root {
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  font-family: Arial, Helvetica, sans-serif
   line-height: 1.5;
   font-weight: 400;
   color: black;
@@ -13,6 +13,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+
 
 a {
   font-weight: 500;
@@ -30,7 +32,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: lightgray;
+  background-color: #121213;
+  width: 100%;
 }
 
 h1 {
