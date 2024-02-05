@@ -159,10 +159,16 @@ const WordleGame = () => {
     } else {
       console.log("PROCESS GUESS")
       
-      // console.log("botPreviousGuesses: ", botPreviousGuesses)
+      
+      console.log("botPreviousGuesses: ", botPreviousGuesses)
 
-      processBotGuess(botPreviousGuesses, botColor, () => {});
+      // processBotGuess(botPreviousGuesses, botColor, () => {});
 
+      const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
+
+      const suggestedWord = await processBotGuess(lastGuess, botColor, () => {});
+
+      makeBotGuess(suggestedWord);
 
 
 
@@ -197,7 +203,6 @@ const WordleGame = () => {
     } else {
       // Prepare for the next turn
       setBotColor(getFeedbackString(newBotMatchedLetters));
-      // Any additional logic for setting up the next turn
     }
   };
 
@@ -231,6 +236,8 @@ const WordleGame = () => {
 
       console.log("/api/guess")
 
+      console.log("curr guess before: ", currentGuess, letterColors)
+
       sendRequest('/api/guess', { currentGuess, letterColors }, (response) => {
         
         // Grabs return of optimal word from process_guess()
@@ -241,7 +248,6 @@ const WordleGame = () => {
       console.error('Error processing guess:', error);
     }
   };
-  
 
 
   // Handle Enter key press

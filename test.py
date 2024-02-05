@@ -28,11 +28,11 @@ def correctLetters(result, guess):
 
 def word_remover(result, guess, possible_words):
     """Returns the list of words with incorrect possibilties removed"""
+    
     bad_letters = badLetters(result, guess)
     correct_letters = correctLetters(result, guess)
-    print("correct: ", correct_letters)
     partial_letters = partialLetters(result, guess)
-    print("partial_letters: ", partial_letters)
+    
     good_letters = []
     for g in correct_letters:
         good_letters.append(g[0])

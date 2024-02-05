@@ -61,7 +61,7 @@ def process_guess():
 
     # Process the guess sent from the React app and return the next guess
     # You can call your existing logic or functions here
-    current_guess = request.json.get('currentGuess')[0]['guess']   # sets guess as one word 5 letter string
+    current_guess = request.json.get('currentGuess')   # sets guess as one word 5 letter string
     print("current_guess: ", current_guess)
     letter_colors = request.json.get('letterColors')
 
@@ -101,8 +101,9 @@ def badLetters(result, guess):
     """Finds incorrect letters in word"""
     bad_letters = []
     for i in range(0, 5):
-        if (result[i] == "b"):
-            bad_letters.append(guess[i])
+        if result[i] == "b":
+            bad_letters.append(guess[i])  # Maybe an error? guess[i], i <--  
+            # Partial and correct both have guess[i], i
     return bad_letters
 
 
@@ -120,36 +121,133 @@ def correctLetters(result, guess):
     correct_letters = []
     for i in range(0, 5):
         if result[i] == "g":
-            correct_letters.append([guess[i], i])
+            correct_letters.append([guess[i], i])  
     return correct_letters
 
 
 def word_remover(result, guess):
+    """
+    Returns a list of words that don't allign with result or guess
+    
+    :param result: letters in word or in correct position in format "bbybg"
+    :param guess: Last guessed word that resulted in param result
+    :return: array of filtered words that could be possibility of param result
+    """
+
+
+
+
     # Use global version of possible_words to prevent decleration 
     global possible_words
 
+    print("p words in function: ", possible_words)
 
-    # Initialize sets for different categories of letters
-    correct_letters = {guess[i] for i in range(5) if result[i] == "g"}
-    misplaced_letters = {guess[i] for i in range(5) if result[i] == "y"}
-    wrong_letters = {guess[i] for i in range(5) if result[i] == "b"}
+    bad_letters = badLetters(result, guess)  # list
+    partial_letters = partialLetters(result, guess)  # tuple (letter, position)
+    correct_letters = correctLetters(result, guess)  # tuple (letter, position)
 
-    def is_valid_word(word):
-        # Check for correct letters in correct positions
-        if any(result[i] == "g" and word[i] != guess[i] for i in range(5)):
-            return False
-        # Check for presence of misplaced letters (but not in the same position)
-        if any((letter in word and word.index(letter) != guess.index(letter)) for letter in misplaced_letters):
-            return False
-        # Check for absence of wrong letters
-        if any(letter in word for letter in wrong_letters):
-            return False
-        return True
+    # Make list of yellow and green letters
+    good_letters = []
+    for letter in correct_letters:
+        good_letters.append(letter[0])
+    for letter in partial_letters:
+        good_letters.append(letter[0])
 
-    # Filter the possible words using the validation function
-    filtered_words = [word for word in possible_words if is_valid_word(word)]
+    # Update bad letters
+    for letter in bad_letters:
+        if letter in good_letters:
+            bad_letters.remove(letter)
+
+
+    print("bad letters: ", bad_letters)
+    no_bad_letters = []
+    # Removes words that contain a letter marked "b" in result
+    for word in possible_words:
+        acceptable_word = True
+
+        for bad_letter in bad_letters:
+            if bad_letter in word:
+                acceptable_word = False
+                break
+         
+        if acceptable_word is True:
+            no_bad_letters.append(word)
     
-    return filtered_words
+    print("no_bad_letters: ", no_bad_letters)
+
+    
+    contains_green = []
+    print("correct letters: ", correct_letters)
+    # Ensures word has the correct letter in position that aligns with "g" from result
+    for word in no_bad_letters:
+        acceptable_word = True
+
+        for tup in correct_letters:
+            letter = tup[0]
+            position = tup[1]
+
+            # Check if the word has the correct letter and index as the "g" from result
+            if word[position] != letter:
+                acceptable_word = False
+                break
+
+        if acceptable_word is True: 
+            contains_green.append(word)
+    
+    print("contains_green: ", contains_green)
+
+
+    filtered_yellow = []
+    # Ensures word does not contain a correct letter in position marked "y"
+    for word in contains_green:
+        acceptable_word = True
+
+        for tup in partial_letters:
+            letter = tup[0]
+            position = tup[1]
+
+            if word[position] == letter:
+                acceptable_word = False
+                break
+
+        if acceptable_word is True:
+            filtered_yellow.append(word)
+    print("filtered_yellow: ", filtered_yellow)
+
+
+    contains_yellow = []
+    # Ensures word has letter marked "y" in it somewhere
+    for word in filtered_yellow:
+        acceptable_word = True
+
+        for letter in good_letters:
+            if letter not in word:
+                acceptable_word = False
+                break
+        
+        if acceptable_word is True:
+            contains_yellow.append(word)
+    
+    print("contains_yellow: ", contains_yellow)
+        
+    
+    correct_frequency = []
+    for word in contains_yellow:
+        acceptable_word = True
+
+        for letter in bad_letters:
+            if letter in good_letters:
+                if word.count(letter) != good_letters.count(letter):
+                    acceptable_word = False
+                    break
+
+        if acceptable_word is True:
+            correct_frequency.append(word)
+    print("correct_frequency: ", correct_frequency)
+        
+    
+    return correct_frequency
+
 
 
 def letterFreq(possible_words):
