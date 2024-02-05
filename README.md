@@ -1,9 +1,9 @@
 # Wordle Solver Bot
 <p align="center">
-  <img width="400" src="https://github.com/ColeCurrent/Wordle-Bot/blob/main/wordleBot.png">
+  <img width="400" src="https://github.com/ColeCurrent/Wordle-Bot/public/wordleBot.png">
 </p>
 
-Could you beat the Wordle bot? Compete against a bot specialized to complete the wordle as optimally as possible. Are you better than
+Could you beat the Wordle bot? Compete against a bot trained to complete the wordle in the mathematically calculated fastest way possible.
 
 
 ## How It Works
@@ -22,6 +22,24 @@ Could you beat the Wordle bot? Compete against a bot specialized to complete the
   - Repeat for every attempts and narrow down the possible word choices
 
 
+## Running Locally
+1) Clone the repository
+    * First, clone the project repository to your local machine using Git. Open your terminal, navigate to the directory where you want to clone the repository, and run:
+```
+  git clone https://github.com/ColeCurrent/Wordle-Bot.git
+```
+
+2) Start React Application
+    * To start the front end, type into the terminal:
+```
+  npm run dev
+```
+
+3) Run Python backend server
+    * To start the backend server, type into hte terminal:
+```
+  python wordle.py
+```
 
 
 ## React + Vite
@@ -32,6 +50,9 @@ Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+
+
 
 
 ### Credits
