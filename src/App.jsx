@@ -2,8 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 
 
-// Send info to Flask API
+
 const sendRequest = async (endpoint, data, callback = null) => {
+  /**
+   *    Send info to Flask API
+   */
+
   try {
     const response = await fetch(`http://localhost:5173${endpoint}`, {
       method: 'POST',
@@ -28,8 +32,11 @@ const sendRequest = async (endpoint, data, callback = null) => {
   }
 };
 
-// Returns a string representation of the feedback colors
+
 const getFeedbackString = (feedback) => {
+  /**
+   *    Returns a string representation of the feedback colors
+   */
   return feedback.map(color => {
     switch (color) {
       case 'green':
@@ -56,43 +63,13 @@ const WordleGame = () => {
   const [suggestedWord, setSuggestedWord] = useState("");
   const [botColor, setBotColor] = useState("bbbbb");
   
-  const [data, setdata] = useState({
-    name: "",
-    age: 0,
-    date: "",
-    programming: "",
-  });
-  
-  // I deleted this and it didnt change much in the actualy wordle so might not be important
-  // Grab info from flask
+
+
   useEffect(() => {
+    /**
+     *  Sets random targert word
+     */
 
-
-
-      // Fetch from flask
-      fetch("/api/data") 
-          .then((res) => res.json()
-          .then((data) => {
-              console.log("Fetched data:", data);
-
-              // Setting a data from api
-              setdata({
-                  name: data.Name,
-                  age: data.Age,
-                  date: data.Date,
-                  programming: data.programming,
-              });
-          })
-          .catch((error) => {
-            console.error("Fetch error:", error);
-        })
-      );
-
-      // startWordle();
-  }, []);
-  
-  // Sets random target word
-  useEffect(() => {
     fetch('/five_letter_words.txt') 
     .then(response => response.text()) // Converts txt file to string
 
@@ -107,16 +84,24 @@ const WordleGame = () => {
 
     .catch(error => console.error("Error fetching word list:", error));
   }, []);
-  
 
 
-  // User input
   const handleInputChange = (event) => {
+    /**
+     *   Handles user input
+     */
+
     setGuess(event.target.value.trim().toLowerCase().substr(0, 5));
   };
 
-  // Check User guess
+
   const handlePlayerGuess = () => {
+    /**
+     *    Checks user guess
+     *    Updates previousUserGuesses array
+     *    Checks if user won
+     */
+
     // Checks if over
     if (!wordList.includes(guess) || gameOver) return;
 
@@ -135,65 +120,52 @@ const WordleGame = () => {
       setGameOver(true);
     } else {
       handleBotGuess();
-      // setTimeout(handleBotGuess, 1000);  // Does bot guess after 1 second delay
     }
   };
 
 
-
-  // Makes Bot Guess
   const handleBotGuess = async () => {
+    /**
+     *    Directs API calls to makeBotGuess() regarding the bots guesses   
+     * 
+     *    Calls startWordle() first iteration - processBotGuess() after
+     *       - Calls makeBotGuess
+     */
+
     if (gameOver) return;
 
     const newAttempts = attempts + 1;
     setAttempts(newAttempts);
 
-    console.log("newAttempts: ", newAttempts)
-
+    // First iteration
     if (newAttempts === 1) {
-      console.log("START WORDLE");
       
       const suggestedWord = await startWordle(); // Await the suggested word
       makeBotGuess(suggestedWord);
 
-    } else {
-      console.log("PROCESS GUESS")
-      
-      
-      console.log("botPreviousGuesses: ", botPreviousGuesses)
+    } else {   // Every non-first Iteration
 
-      // processBotGuess(botPreviousGuesses, botColor, () => {});
-
+      // pulls last string out of botPreviousGuesses array
       const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
 
       const suggestedWord = await processBotGuess(lastGuess, botColor, () => {});
 
       makeBotGuess(suggestedWord);
 
-
-
-      console.log("Suggested Word Processed: ", suggestedWord)
     }
-
   };
 
+
   const makeBotGuess = (botGuessedWord) => {
-    // Check matched letters for the bot's guess
+    /**
+     *    Update bots previous guesses
+     *    Check bot win status
+     */
+
     const newBotMatchedLetters = checkMatchedLetters(botGuessedWord);
-    
-    console.log("makeBotGuess is running")
-
-
-    // Log the current guess information
-    console.log('Bot Guess:', {
-      guess: botGuessedWord,
-      feedback: newBotMatchedLetters
-    });
   
     // Update previous guesses with the current guess and feedback
     setTimeout(setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]), 2000);
-
-    console.log("botPreviousGuesses is updated: ", botPreviousGuesses)
 
     // Check if the bot has won or if the game is over due to maximum attempts reached
     if (newBotMatchedLetters.every(matched => matched === 'green') || attempts >= 6) {
@@ -206,23 +178,33 @@ const WordleGame = () => {
     }
   };
 
-  // Runs whenever suggestedWord changes
+
   useEffect(() => {
+    /**
+     *    Makes bot guess whenever suggestWord is updated in API calls
+     */
     if (suggestedWord) {
       makeBotGuess(suggestedWord);
     }
   }, [suggestedWord]); 
 
-  // Grab bots starter guess from backend
+
   const startWordle = async () => {
+    /**
+     *    Grab bots starter guess from backend
+     */
+
     try {
-      console.log("/api/start");
+      // Makes POST call to backend
       const response = await fetch("http://localhost:5173/api/start", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
+
+      // Set data to Flask output
       const data = await response.json();
-      return data.suggestedWord; // Return the suggested word from the response
+      return data.suggestedWord;
+
     } catch (error) {
       console.error('Error starting Wordle:', error);
       return ""; // Return an empty string or handle the error appropriately
@@ -230,19 +212,18 @@ const WordleGame = () => {
   };
   
 
-  // Grab bots calculated guess from backend
   const processBotGuess = async (currentGuess, letterColors) => {
+    /**
+     *    Grab bots calculated guess from backend using callback
+     */
+
     try {
 
-      console.log("/api/guess")
-
-      console.log("curr guess before: ", currentGuess, letterColors)
-
       sendRequest('/api/guess', { currentGuess, letterColors }, (response) => {
-        
+
         // Grabs return of optimal word from process_guess()
         setSuggestedWord(response.nextGuess);
-        
+
       });
     } catch (error) {
       console.error('Error processing guess:', error);
@@ -250,15 +231,22 @@ const WordleGame = () => {
   };
 
 
-  // Handle Enter key press
   const handleEnterKey = (event) => {
+    /**
+     *    Handle Enter key press
+     */
+
     if (event.key === 'Enter') {
       handlePlayerGuess();
     }
   };
 
-  // Handle Enter key press
+
   useEffect(() => {
+    /**
+     *    Handle Enter key press
+     */
+
     document.addEventListener('keydown', handleEnterKey);
     return () => {
       document.removeEventListener('keydown', handleEnterKey);
@@ -266,10 +254,14 @@ const WordleGame = () => {
   }, [handlePlayerGuess]);
 
 
-  // Returns array of guesses matching colors 
   const checkMatchedLetters = (guessWord) => {
+    /**
+     *    Returns array of guesses matching colors 
+     */
+
     const newMatchedLetters = Array(5).fill(null);
 
+    // Loops through every letter in wordle word
     for (let i = 0; i < TARGET_WORD.length; i++) {
       if (guessWord[i] === TARGET_WORD[i]) {
         newMatchedLetters[i] = 'green';
@@ -284,8 +276,11 @@ const WordleGame = () => {
     return newMatchedLetters;
   };
 
-  // Resets game
+
   const resetGame = () => {
+    /**
+     *    Resets game
+     */
     setGuess('');
     setAttempts(0);
     setGameOver(false);
@@ -294,7 +289,6 @@ const WordleGame = () => {
     const randomIndex = Math.floor(Math.random() * wordList.length);
     setTargetWord(wordList[randomIndex]);
   };
-
 
 
   // Displays UIs
@@ -313,11 +307,12 @@ const WordleGame = () => {
             slate
           </button>
 
+
           {userPreviousGuesses.length > 0 && (
             <div>
               {userPreviousGuesses.map((prevGuess, index) => (
-                <div key={index}> {/* Change this from <p> to <div> */}
-                  <h1> {/* This is fine as it's directly inside a <div> */}
+                <div key={index}>
+                  <h1>
                     {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
                       <span
                         key={idx}
@@ -339,7 +334,6 @@ const WordleGame = () => {
             onChange={handleInputChange}
             disabled={gameOver}
           />
-
 
           <p>Attempts: {attempts}</p>
           <button onClick={handlePlayerGuess} disabled={gameOver}>
@@ -365,17 +359,16 @@ const WordleGame = () => {
         <div className="bot-game">
           <h1>Bot's Game</h1>
 
-          <h2 className="player-game">ANSWER: {TARGET_WORD}</h2>
-
           {botPreviousGuesses.length > 0 && (
             <div>
               {botPreviousGuesses.map((prevGuess, index) => (
-                <div key={index}> {/* Change this from <p> to <div> */}
-                  <h1> {/* This is fine as it's directly inside a <div> */}
+                <div key={index}>
+                  <h1> 
                     {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
                       <span
                         key={idx}
-                        className={prevGuess.feedback[idx]} // Apply the class based on feedback color
+                        className={`${prevGuess.feedback[idx]} ${gameOver ? 'reveal-text' : ''}`} // Add 'reveal-text' if the game is over
+                        // className={prevGuess.feedback[idx]} // Apply the class based on feedback color
                       >
                         {letter}
                       </span>
@@ -385,45 +378,14 @@ const WordleGame = () => {
               ))}
             </div>
           )}
-          {/* Attempts, Game over message for bot */}
 
         </div>
 
-
-      </div>
-      {/* Reset Game button */}
-
-      <div className="gray"> COLOR PATTERN
-        <p>{botColor}</p>
       </div>
 
-
-
-      <p>BOT GUESS BELOW</p>
-      {botPreviousGuesses.map((guessObj, index) => (
-        <p key={index}>{guessObj.guess}</p>
-      ))}
-
-
-      {/* Tester */}
-      <div className="green">
-        <header>
-            <h1>React and flask</h1>
-            <p>Suggested Word: {suggestedWord}</p>
-
-            {/* Calling a data from setdata for showing */}
-            <p>{data.name}</p>
-            <p>{data.age}</p>
-            <p>{data.date}</p>
-            <p>{data.programming}</p>
-
-        </header>
-      </div>
     </div>
 
 
-
-    
   );
 };
 
