@@ -64,11 +64,13 @@ def process_guess():
     current_guess = request.json.get('currentGuess')[0]['guess']   # sets guess as one word 5 letter string
     print("current_guess: ", current_guess)
     letter_colors = request.json.get('letterColors')
-    print("letter_colors: ",letter_colors)
 
     # Update the global variable with the filtered list
     # print("possible words len: ", possible_words)
+    print("letter colors: ", letter_colors)
+    print("current guess: ", current_guess)
     possible_words = word_remover(letter_colors, current_guess)
+    
 
     suggestion = bestWord(possible_words, letterFreq(possible_words))
 
@@ -99,7 +101,7 @@ def badLetters(result, guess):
     """Finds incorrect letters in word"""
     bad_letters = []
     for i in range(0, 5):
-        if (i < len(guess)) and (isinstance(result[i], str)) and (result[i] == "b"):
+        if (result[i] == "b"):
             bad_letters.append(guess[i])
     return bad_letters
 
@@ -126,6 +128,7 @@ def word_remover(result, guess):
     # Use global version of possible_words to prevent decleration 
     global possible_words
 
+
     # Initialize sets for different categories of letters
     correct_letters = {guess[i] for i in range(5) if result[i] == "g"}
     misplaced_letters = {guess[i] for i in range(5) if result[i] == "y"}
@@ -136,7 +139,7 @@ def word_remover(result, guess):
         if any(result[i] == "g" and word[i] != guess[i] for i in range(5)):
             return False
         # Check for presence of misplaced letters (but not in the same position)
-        if any((letter in word and word.index(letter) == guess.index(letter)) for letter in misplaced_letters):
+        if any((letter in word and word.index(letter) != guess.index(letter)) for letter in misplaced_letters):
             return False
         # Check for absence of wrong letters
         if any(letter in word for letter in wrong_letters):

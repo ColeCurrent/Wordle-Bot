@@ -159,15 +159,13 @@ const WordleGame = () => {
     } else {
       console.log("PROCESS GUESS")
       
-      console.log("botPreviousGuesses: ", botPreviousGuesses)
+      // console.log("botPreviousGuesses: ", botPreviousGuesses)
 
       processBotGuess(botPreviousGuesses, botColor, () => {});
 
-      // This code will execute after `suggestedWord` is updated
-      makeBotGuess(suggestedWord);
 
 
-      console.log("botPreviousGuesses2: ", botPreviousGuesses)
+
       console.log("Suggested Word Processed: ", suggestedWord)
     }
 
@@ -187,9 +185,9 @@ const WordleGame = () => {
     });
   
     // Update previous guesses with the current guess and feedback
-    setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]);
+    setTimeout(setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]), 2000);
 
-    console.log("botPreviousGuesses3: ", botPreviousGuesses)
+    console.log("botPreviousGuesses is updated: ", botPreviousGuesses)
 
     // Check if the bot has won or if the game is over due to maximum attempts reached
     if (newBotMatchedLetters.every(matched => matched === 'green') || attempts >= 6) {
@@ -202,6 +200,13 @@ const WordleGame = () => {
       // Any additional logic for setting up the next turn
     }
   };
+
+  // Runs whenever suggestedWord changes
+  useEffect(() => {
+    if (suggestedWord) {
+      makeBotGuess(suggestedWord);
+    }
+  }, [suggestedWord]); 
 
   // Grab bots starter guess from backend
   const startWordle = async () => {
