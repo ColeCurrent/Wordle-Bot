@@ -39,7 +39,9 @@ Could you beat the Wordle bot? Compete against a bot trained to complete the wor
 
 5) Start React Application
     * To start the front end, type into the terminal:
-     
+    ```
+      npm install
+    ```
     ```
       npm run dev
     ```
