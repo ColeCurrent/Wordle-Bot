@@ -51,15 +51,13 @@ Could you beat the Wordle bot? Compete against a bot trained to complete the wor
       python wordle.py
     ```
 
-          pip install flask flask-cors
 
 NOTE: If getting error import "flask_cors" could not be resolved from sourcePylance
     * Change Python interpreter to "Python 3.11.5 ('base')"
     * pip install flask
 
-    ```
       pip install flask flask-cors
-    ```
+
     
     
 ## React + Vite
