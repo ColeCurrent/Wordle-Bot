@@ -25,27 +25,41 @@ Could you beat the Wordle bot? Compete against a bot trained to complete the wor
 ## Running Locally
 1) Clone the repository
     * First, clone the project repository to your local machine using Git. Open your terminal, navigate to the directory where you want to clone the repository, and run:
+
     ```
       git clone https://github.com/ColeCurrent/Wordle-Bot.git
     ```
 
-2) Navigate to project directory:
+3) Navigate to project directory:
     * cd into the project directory "Wordle-Bot":
+
     ```
       cd Wordle-Bot
     ```
 
-3) Start React Application
+5) Start React Application
     * To start the front end, type into the terminal:
+     
     ```
       npm run dev
     ```
 
-4) Run Python backend server
+6) Run Python backend server
     * To start the backend server, type into the terminal:
+
     ```
       python wordle.py
     ```
+
+NOTE: If getting error import "flask_cors" could not be resolved from sourcePylance
+    * pip install flask
+    
+    ```
+      pip install flask flask-cors
+    ```
+      
+    * Change Python interpreter to "Python 3.11.5 ('base')"
+    
 
 
 ## React + Vite
