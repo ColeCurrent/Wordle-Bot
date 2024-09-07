@@ -19,7 +19,12 @@ const thief_wordle = () => {
 
     }, []);
 
-    
+    /**
+    * 
+    * @param char letter: letter contained in given tile
+    * @param int index: index of letter in word 
+    * @return string of rgb value of given index
+    */
     function getTileColor(letter, index) {
         const isCorrectLetter = word.includes(letter);
 
@@ -35,7 +40,7 @@ const thief_wordle = () => {
         }
 
         return "rgb(181, 159, 59)"
-};
+    };
 
 
     function handleSubmitWord(){
@@ -148,8 +153,6 @@ const thief_wordle = () => {
 
         }
     }
-
-
 
 
     return (
