@@ -62,6 +62,7 @@ const WordleGame = () => {
   const [gameOver, setGameOver] = useState(false);
   const [suggestedWord, setSuggestedWord] = useState("");
   const [botColor, setBotColor] = useState("bbbbb");
+  const [isBotTurn, setIsBotTurn] = useState(false); // DELETE
   
 
   useEffect(() => {
@@ -174,29 +175,24 @@ const WordleGame = () => {
       // Wait for all the setTimeouts to complete before joining arrays
       setTimeout(() => {
 
-            /**
-          // Checks if over
-          // if (!wordList.includes(guess) || gameOver) return;
- 
-          const newAttempts = attempts + 1;
-          setAttempts(newAttempts);
- 
-          // Apply colors
-          const newMatchedLetters = checkMatchedLetters(guess);
- 
-          // Update previous guess with current guess + feedback
-          setUserPreviousGuesses(prevGuesses => [...prevGuesses, { guess, feedback: newMatchedLetters }]);
-          setGuess('');
-            */
           
           const currentColorsStr = currentColors.join("");
           const backendSendMaybe = [currentWord, currentColorsStr]  // ["slate", "bbgyb"]
           console.log("backendSendMaybe: ", backendSendMaybe)
           // handleBotWord(); 
           console.log("attempts: ", attempts);
-          handleBotGuess();
+          // handleBotGuess();
+          setIsBotTurn(true);  // Set bot's turn after the user makes a guess
       }, interval * currentWordArr.length);
   }
+
+  useEffect(() => {
+    if (isBotTurn) {
+        handleBotGuess();
+        // setAttempts(prevAttempt => prevAttempt + 1);
+        setIsBotTurn(false);  // Reset after the bot makes its guess
+    }
+  }, [isBotTurn]);  // Trigger only when it's the bot's turn
 
 
   const handleBotWord = async () => {
@@ -407,11 +403,14 @@ const WordleGame = () => {
      *    Calls startWordle() first iteration - processBotGuess() after
      *       - Calls makeBotGuess
      */
-
+    console.log("handleBotGuess1: "); 
     if (gameOver) return;
-
+    console.log("handleBotGuess2: "); 
+        
     const newAttempts = attempts + 1;
     setAttempts(newAttempts);
+    
+    console.log("newAttempts: ", newAttempts);
 
     // First iteration
     if (newAttempts === 1) {
@@ -419,20 +418,25 @@ const WordleGame = () => {
       console.log("PreSuggestedWord");
       const suggestedWord = await startWordle(); // Await the suggested word
 
-      console.log("postSuggestedWord");
+      console.log("postSuggestedWord: ", suggestedWord);
       makeBotGuess(suggestedWord);
 
     } else {   // Every non-first Iteration
 
+      console.log("botPreviousGuesses: ", botPreviousGuesses);
       // pulls last string out of botPreviousGuesses array
       const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
 
       const suggestedWord = await processBotGuess(lastGuess, botColor, () => {});
 
+      console.log("nonfirstSuggestedWord: ", suggestedWord);
       makeBotGuess(suggestedWord);
 
     }
-  };
+
+
+};
+
 
 
   const makeBotGuess = (botGuessedWord) => {
@@ -442,9 +446,11 @@ const WordleGame = () => {
      */
 
     const newBotMatchedLetters = checkMatchedLetters(botGuessedWord);
+    console.log("matchedLetters: ", newBotMatchedLetters);
   
     // Update previous guesses with the current guess and feedback
     setTimeout(setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]), 2000);
+
 
     // Check if the bot has won or if the game is over due to maximum attempts reached
     if (newBotMatchedLetters.every(matched => matched === 'green') || attempts >= 6) {
@@ -474,14 +480,18 @@ const WordleGame = () => {
      */
 
     try {
+      console.log("startWordle1: ")
       // Makes POST call to backend
       const response = await fetch("http://localhost:5173/api/start", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
 
+      console.log("startWordle2: ")
       // Set data to Flask output
       const data = await response.json();
+            
+      console.log("startWordle3: ")
       return data.suggestedWord;
 
     } catch (error) {
@@ -540,6 +550,7 @@ const WordleGame = () => {
 
     const newMatchedLetters = Array(5).fill(null);
 
+    console.log("TARGET_WORD: ", TARGET_WORD);
     // Loops through every letter in wordle word
     for (let i = 0; i < TARGET_WORD.length; i++) {
       if (guessWord[i] === TARGET_WORD[i]) {
