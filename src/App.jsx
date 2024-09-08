@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 
 
@@ -62,13 +62,15 @@ const WordleGame = () => {
   const [gameOver, setGameOver] = useState(false);
   const [suggestedWord, setSuggestedWord] = useState("");
   const [botColor, setBotColor] = useState("bbbbb");
-  const [isBotTurn, setIsBotTurn] = useState(false); // DELETE
+  const [isBotTurn, setIsBotTurn] = useState(false); 
+  let hasRunEffect = false; 
   
 
   useEffect(() => {
     /**
      *  Sets random target word
      */
+
 
     fetch('/five_letter_words.txt') 
     .then(response => response.text()) // Converts txt file to string
@@ -93,15 +95,23 @@ const WordleGame = () => {
   let word = "white"; 
   let guessWordCount = 0;
 
-  useEffect(() => {
-    createUserSquares();
-    createBotSquares();
+  /**
+   *    Create user board, bot board, and key listeners
+   */
+   useEffect(() => {
 
-    attachKeyListeners()
+    attachKeyListeners();
+
+    if (!hasRunEffect) {
+        console.log("cus");
+        createUserSquares();
+        createBotSquares();
+        hasRunEffect = true;
+        console.log(hasRunEffect);
+    }
 
     return () => removeKeyListeners();
-  } , []);
-
+   }, []);
 
   /**
    * Returns the color of a given tile 
@@ -154,7 +164,9 @@ const WordleGame = () => {
               currentColors.push(tileColorChar);
 
               const letterID = firstLetterID + index;
+              console.log("letterID: ", firstLetterID + index);
               const letterEl = document.getElementById(letterID);
+              console.log("letterEl: ", letterEl);
               letterEl.classList.add("animate__flipInX");
               letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
           }, interval * index);
@@ -186,6 +198,11 @@ const WordleGame = () => {
       }, interval * currentWordArr.length);
   }
 
+  /**
+   * Runs handleBotGuess() once the user makes their guess
+   *
+   * Used to align attempt states due to setTimeout() 
+   */
   useEffect(() => {
     if (isBotTurn) {
         handleBotGuess();
@@ -193,73 +210,6 @@ const WordleGame = () => {
         setIsBotTurn(false);  // Reset after the bot makes its guess
     }
   }, [isBotTurn]);  // Trigger only when it's the bot's turn
-
-
-  const handleBotWord = async () => {
-    
-     /**
-     *    Directs API calls to makeBotGuess() regarding the bots guesses   
-     * 
-     *    Calls startWordle() first iteration - processBotGuess() after
-     *       - Calls makeBotGuess
-     */
-    if (gameOver) return;
-
-    const newAttempts = attempts + 1;
-    setAttempts(newAttempts);
-
-    // First iteration
-    if (newAttempts === 1) {
-        
-      const suggestedWord = await startWordle(); // Await the suggested word
-
-      console.log("suggestWord: ", suggestedWord)
-      makeBotGuess(suggestedWord);
-
-    } else {   // Every non-first Iteration
-
-      // pulls last string out of botPreviousGuesses array
-      const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
-
-      const suggestedWord = await processBotGuess(lastGuess, botColor, () => {});
-
-      console.log("suggestWord: ", suggestedWord)
-      makeBotGuess(suggestedWord);
-
-    }
-  };
-
-
-/**
-
-    const firstLetterID = guessWordCount * 5 + 1;
-    const interval = 300;
-
-    currentWordArr.forEach((letter, index) => {
-        setTimeout(() => {
-            const tileColor = getTileColor(letter, index);
-
-            const letterID = firstLetterID + index;
-            const letterEl = document.getElementById(letterID);
-            letterEl.classList.add("animate__flipInX");
-            letterEl.style = `background-color:${tileColor};border-color:${tileColor}`;
-        }, interval * index);
-    });
-
-    guessWordCount += 1;
-
-    if (currentWord === word) {
-        window.alert(`You lost :( The word is ${word}`);
-    }
-    
-    // CHANGE from window alert to Text display
-    if (guessedWords.length === 6) {
-        window.alert("Congratuations!");
-    }
-
-    guessedWords.push([])
-    */
-  
 
 
   function handleDeleteLetter() {
@@ -278,6 +228,7 @@ const WordleGame = () => {
   function attachKeyListeners() {
       const keys = document.querySelectorAll('.keyboard-row button');
       for (let i = 0; i < keys.length; i++) {
+          console.log("Keys[", i, "]: ", keys[i]);
           keys[i].onclick = (event) => {
               const letter = event.target.getAttribute("data-key");
 
@@ -320,6 +271,9 @@ const WordleGame = () => {
           currentWordArr.push(letter)
 
           const availableSpaceEl = document.getElementById(String(availableSpace))
+          console.log("availableSpace: ", availableSpace);
+          console.log("availableSpaceEl: ", availableSpaceEl);
+
           availableSpace = availableSpace + 1
 
           availableSpaceEl.textContent = letter;
@@ -329,11 +283,12 @@ const WordleGame = () => {
 
   function createUserSquares() {
       const gameBoard = document.getElementById("board");
-
-      for (let index = 0; index < 15; index++) {
+      console.log("createUserSquares");
+      for (let index = 0; index < 30; index++) {
           let square = document.createElement("div");
           square.classList.add("square");
           square.classList.add("animate__animated");
+          // let idStr = (index + 1).toString() + "_userID";
           square.setAttribute("id", index + 1);
           gameBoard.appendChild(square);
 
@@ -343,11 +298,13 @@ const WordleGame = () => {
   function createBotSquares() {
     const gameBoard = document.getElementById("bot-board");
 
-    for (let index = 0; index < 15; index++) {
+    for (let index = 0; index < 30; index++) {
         let square = document.createElement("div");
         square.classList.add("square");
         square.classList.add("animate__animated");
-        square.setAttribute("id", index + 1);
+        let idStr = (index + 1).toString() + "_botID";
+        console.log(idStr);
+        square.setAttribute("id", idStr);
         gameBoard.appendChild(square);
 
     }
@@ -419,6 +376,33 @@ const WordleGame = () => {
       const suggestedWord = await startWordle(); // Await the suggested word
 
       console.log("postSuggestedWord: ", suggestedWord);
+
+
+            // Test Animation
+    const firstLetterID = guessWordCount * 5 + 1;
+    const interval = 300;
+    
+    let currentColors = []
+    // Loop through each letter in user word array
+      const currentWordArr = suggestedWord.split('');
+      currentWordArr.forEach((letter, index) => {
+          setTimeout(() => {
+              const tileArr = getTileColor(letter, index);
+              const tileColorRGB = tileArr[0];  // in form "rgb(83, 141, 78)"
+              const tileColorChar = tileArr[1]; // in form "g"
+
+              currentColors.push(tileColorChar);
+
+              const letterID = (firstLetterID + index).toString() + "_botID";
+              console.log("letterID: ", letterID);
+              const letterEl = document.getElementById(letterID);
+              console.log("letterEl: ", letterEl);
+              letterEl.classList.add("animate__flipInX");
+              letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
+          }, interval * index);
+      });
+
+
       makeBotGuess(suggestedWord);
 
     } else {   // Every non-first Iteration
@@ -430,11 +414,38 @@ const WordleGame = () => {
       const suggestedWord = await processBotGuess(lastGuess, botColor, () => {});
 
       console.log("nonfirstSuggestedWord: ", suggestedWord);
+
+            
+            // Test Animation
+    const firstLetterID = guessWordCount * 5 + 1;
+    const interval = 300;
+    
+    let currentColors = []
+    // Loop through each letter in user word array
+      const currentWordArr = suggestedWord.split('');
+      currentWordArr.forEach((letter, index) => {
+          setTimeout(() => {
+              const tileArr = getTileColor(letter, index);
+              const tileColorRGB = tileArr[0];  // in form "rgb(83, 141, 78)"
+              const tileColorChar = tileArr[1]; // in form "g"
+
+              currentColors.push(tileColorChar);
+
+              const letterID = firstLetterID + index;
+              console.log("letterID: ", letterID);
+              const letterEl = document.getElementById(letterID);
+              console.log("letterEl: ", letterEl);
+              letterEl.classList.add("animate__flipInX");
+              letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
+          }, interval * index);
+      });
+
+
       makeBotGuess(suggestedWord);
 
     }
 
-
+    
 };
 
 
