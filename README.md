@@ -1,6 +1,6 @@
 # Wordle Solver Bot
 <p align="center">
-  <img width="400" src="/public/robot-solving-wordle.png" alt="Wordle Logo">
+  <img width="400" src="/public/favicon.png" alt="Wordle Logo">
 </p>
 
 Could you beat the Wordle bot? Compete against a bot trained to complete the wordle in the mathematically calculated fastest way possible.
