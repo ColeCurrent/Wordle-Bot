@@ -255,3 +255,8 @@
   background-color: #121213;
   color: white;
 }
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 1s ease-out;
+}

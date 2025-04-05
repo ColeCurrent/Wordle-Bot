@@ -23,6 +23,7 @@ const WordleGame = () => {
   const [suggestedWord, setSuggestedWord] = useState("");
   const [botColor, setBotColor] = useState("bbbbb");
   const [isBotTurn, setIsBotTurn] = useState(false); 
+  const [isBotGuessing, setIsBotGuessing] = useState(false);
   const [isAvailable, setAvailability] = useState(false);
   const [message, setMessage] = useState("");
   const [guessedWords, setGuessedWords] = useState([[]]);
@@ -33,7 +34,7 @@ const WordleGame = () => {
 
   function handleKeyInput(key) {
       // Prevent any input if game is over
-      if (gameOver) {
+      if (gameOver || isBotGuessing) {
           return;
       }
 
@@ -83,12 +84,18 @@ const WordleGame = () => {
       
       if (currentWordArr.length !== 5) {
           setMessage("Not enough letters");
+          setTimeout(() => {
+            setMessage("");
+          }, 3000);
           return;
       }
 
       // Check if the word is valid
       if (!wordList.includes(currentWord.toLowerCase())) {
           setMessage("Not in word list");
+          setTimeout(() => {
+            setMessage("");
+          }, 3000);
           return;
       }
 
@@ -240,6 +247,7 @@ const WordleGame = () => {
      */
     if (gameOver) return;
         
+    setIsBotGuessing(true);
     const newAttempts = attempts + 1;
     setAttempts(newAttempts);
     
@@ -269,14 +277,21 @@ const WordleGame = () => {
         }, interval * index);
       });
 
-      makeBotGuess(suggestedWord);
+      // makeBotGuess(suggestedWord);
+      setTimeout(() => {
+        makeBotGuess(suggestedWord);
+        setIsBotGuessing(false);
+      }, interval * currentWordArr.length);
+
     } else {
         const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
         const response = await processBotGuess(lastGuess, botColor);
         if (response && response.nextGuess) {
             setSuggestedWord(response.nextGuess);
         }
+        setIsBotGuessing(false);
     }
+
   };
 
 
