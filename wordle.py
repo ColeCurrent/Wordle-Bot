@@ -56,9 +56,15 @@ def process_guess():
     # Update the global variable with the filtered list
     possible_words = word_remover(letter_colors, current_guess)
     
+    # Check if we have any possible words left
+    if not possible_words:
+        return jsonify({"error": "No possible words left"}), 400
+    
     suggestion = bestWord(possible_words, letterFreq(possible_words))
 
-    possible_words.remove(suggestion)
+    # Only remove the suggestion if it exists in the list
+    if suggestion in possible_words:
+        possible_words.remove(suggestion)
 
     return jsonify({"nextGuess": suggestion})
 

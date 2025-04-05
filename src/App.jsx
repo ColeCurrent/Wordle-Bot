@@ -1,35 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Keyboard from './components/Keyboard';
-
-const sendRequest = async (endpoint, data, callback = null) => {
-  /**
-   *    Send info to Flask API
-   */
-
-  try {
-    const response = await fetch(`http://localhost:5173${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const responseData = await response.json();
-    if (callback && typeof callback === 'function') {
-      callback(responseData);
-    }
-    return responseData;
-  } catch (error) {
-    console.error('Error in sendRequest:', error);
-    throw error; // rethrow the error for further handling if needed
-  }
-};
+import { startWordle, processBotGuess } from './services/wordleApi';
 
 
 const getFeedbackString = (feedback) => {
@@ -352,9 +324,7 @@ const WordleGame = () => {
 
     // First iteration
     if (newAttempts === 1) {
-          
         const suggestedWord = await startWordle(); // Await the suggested word
-
         console.log("firstSuggestedWord: ", suggestedWord);
     
         // Animate first guess manually
@@ -369,22 +339,23 @@ const WordleGame = () => {
             const tileColorRGB = tileArr[0];  // in form "rgb(83, 141, 78)"
             const tileColorChar = tileArr[1]; // in form "g"
 
-            currentColors.push(tileColorChar);
+          currentColors.push(tileColorChar);
 
-            const letterID = (firstLetterID + index).toString() + "_botID";
-            const letterEl = document.getElementById(letterID);
-            letterEl.classList.add("animate__flipInX");
-            letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
-          }, interval * index);
-        });
+          const letterID = (firstLetterID + index).toString() + "_botID";
+          const letterEl = document.getElementById(letterID);
+          letterEl.classList.add("animate__flipInX");
+          letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
+        }, interval * index);
+      });
 
-        makeBotGuess(suggestedWord);
-
-    } else {   // Every non-first Iteration
+      makeBotGuess(suggestedWord);
+    } else {
         console.log("botPreviousGuesses: ", botPreviousGuesses);
-        // pulls last string out of botPreviousGuesses array
         const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
-        await processBotGuess(lastGuess, botColor, () => {});
+        const response = await processBotGuess(lastGuess, botColor);
+        if (response && response.nextGuess) {
+            setSuggestedWord(response.nextGuess);
+        }
         console.log("nonfirstSuggestedWord: ", suggestedWord);
     }
   };
@@ -485,50 +456,6 @@ const WordleGame = () => {
       animateBotGuess(suggestedWord);
     }
   }, [suggestedWord]); 
-
-
-  const startWordle = async () => {
-    /**
-     *    Grab bots starter guess from backend
-     */
-
-    try {
-      // Makes POST call to backend
-      const response = await fetch("http://localhost:5173/api/start", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      // Set data to Flask output
-      const data = await response.json();
-            
-      return data.suggestedWord;
-
-    } catch (error) {
-      console.error('Error starting Wordle:', error);
-      return ""; // Return an empty string or handle the error appropriately
-    }
-  };
-  
-
-  const processBotGuess = async (currentGuess, letterColors) => {
-    /**
-     *    Grab bots calculated guess from backend using callback
-     */
-
-    try {
-
-      sendRequest('/api/guess', { currentGuess, letterColors }, (response) => {
-
-        console.log("response: ", response);
-        // Grabs return of optimal word from process_guess()
-        setSuggestedWord(response.nextGuess);
-        
-      });
-    } catch (error) {
-      console.error('Error processing guess:', error);
-    }
-  };
 
 
   const checkMatchedLetters = (guessWord) => {
