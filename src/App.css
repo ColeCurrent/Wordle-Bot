@@ -16,10 +16,33 @@
 /* Game container */
 .game-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  max-width: 800px; /* Adjust as needed */
-  /* margin-bottom: 300px; */
+  max-width: 1000px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.title-container {
+  /* margin: 20px 0; */
+}
+
+.message-container {
+  height: 30px;
+  margin-bottom: 20px;
+}
+
+.boards-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.tile-container {
+  width: 330px;
 }
 
 #board-container {
@@ -36,6 +59,8 @@
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 #bot-board-container {
@@ -52,25 +77,31 @@
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .square {
   border: 2px solid rgb(58, 58, 60);
-  min-width: 50px; 
-  min-height: 50px;
-  font-size: 50px;
+  width: 62px;
+  height: 62px;
+  font-size: 2.5rem;
   font-weight: bold;
   color: gainsboro;
   text-transform: uppercase;
-
   display: flex;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
+  line-height: 1;
 }
 
 #keyboard-container {
   height: 200px;
-  width: 50%;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  margin-top: 20px;
 }
 
 .keyboard-row {
@@ -94,7 +125,7 @@
   text-transform: uppercase;
   margin-right: 6px;
   border-radius: 4px;
-  user-select: none;
+  /* user-select: none; */
 }
 
 .keyboard-row button.wide-button {
@@ -216,4 +247,11 @@
 
 .reveal-text {
   color: black !important; /* Override text color */
+}
+
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background-color: #121213;
+  color: white;
 }

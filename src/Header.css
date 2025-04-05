@@ -23,15 +23,7 @@ html, body {
     font-weight: 700;
   
 }
-  
-.subhead {
-    font-size: 20px;
-    text-align: center;
-    margin-top: 0px;
-    font-style: italic;
-
-}
-
+ 
 .hamburger {
     position: absolute;
     top: 20%;
@@ -40,8 +32,8 @@ html, body {
     width: 2rem;
     height: 2rem;
     display: flex;
-    justify-content: space-around;
     flex-flow: column nowrap;
+    justify-content: space-around;
     z-index: 10;
 }
 

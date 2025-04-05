@@ -12,13 +12,12 @@ const Header = () => {
             </div>
 
             <div className="icons">
-                <img id="settings" src="/public/settings-icon.png" alt="Logo" />
-                <img id="question" src="/public/question.png" alt="Logo" />
+                <img id="settings" src="/settings-icon.png" alt="Logo" />
+                <img id="question" src="/question.png" alt="Logo" />
             </div>
 
             <div>
                 <h1 className="header-text">WORDLE</h1>
-                <h1 className="subhead">the modern tale of John Henry</h1>
             </div>
 
             <hr></hr>
