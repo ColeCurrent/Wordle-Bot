@@ -104,6 +104,11 @@ const WordleGame = () => {
 
 
   function handleKeyInput(key) {
+      // Prevent any input if game is over
+      if (gameOver) {
+          return;
+      }
+
       if (key === 'enter') {
           handleUserWord();
       } else if (key === 'del') {
@@ -164,13 +169,20 @@ const WordleGame = () => {
       console.log("TargetWord: ", TARGET_WORD);
 
       const currentWordArr = getCurrentWordArr();
-      const currentWord = currentWordArr.join("")
-      setGuess(currentWord);
+      const currentWord = currentWordArr.join("");
+      
       if (currentWordArr.length !== 5) {
           setMessage("Not enough letters");
           return;
       }
 
+      // Check if the word is valid
+      if (!wordList.includes(currentWord.toLowerCase())) {
+          setMessage("Not in word list");
+          return;
+      }
+
+      setGuess(currentWord);
 
       // Apply colors
       const newMatchedLetters = checkMatchedLetters(currentWord);
@@ -178,9 +190,8 @@ const WordleGame = () => {
       // Update previous guess with current guess + feedback
       setUserPreviousGuesses(prevGuesses => [...prevGuesses, { guess: currentWord, feedback: newMatchedLetters }]);
 
-
       const firstLetterID = guessWordCount * 5 + 1;
-      const interval = 300;
+      const interval = 400;
     
       let currentColors = []
 
@@ -238,18 +249,26 @@ const WordleGame = () => {
 
 
   function handleDeleteLetter() {
-      const currentWordArr = getCurrentWordArr()
-      currentWordArr.pop()
+      // Prevent deleting letters if game is over
+      if (gameOver) {
+          return;
+      }
 
-      const newGuessedWords = [...guessedWords]
-      newGuessedWords[newGuessedWords.length - 1] = currentWordArr
-      setGuessedWords(newGuessedWords)
+      const currentWordArr = getCurrentWordArr();
+      
+      // Only allow deletion if we're on the current line and there are letters to delete
+      if (currentWordArr && currentWordArr.length > 0 && availableSpace > guessWordCount * 5 + 1) {
+          currentWordArr.pop();
 
-      const lastLetterEl = document.getElementById(String(availableSpace - 1))
+          const newGuessedWords = [...guessedWords];
+          newGuessedWords[newGuessedWords.length - 1] = currentWordArr;
+          setGuessedWords(newGuessedWords);
 
-      if (lastLetterEl) {
-          lastLetterEl.textContent = ''
-          setAvailableSpace(availableSpace - 1)
+          const lastLetterEl = document.getElementById(String(availableSpace - 1));
+          if (lastLetterEl) {
+              lastLetterEl.textContent = '';
+              setAvailableSpace(availableSpace - 1);
+          }
       }
   }
 
@@ -259,19 +278,27 @@ const WordleGame = () => {
   }
 
   function updateGuessedWords(letter) {
-      const currentWordArr = getCurrentWordArr()
+      // Prevent adding letters if game is over
+      if (gameOver) {
+          return;
+      }
 
-      if (currentWordArr && currentWordArr.length < 5) {
-          const newGuessedWords = [...guessedWords]
-          currentWordArr.push(letter)
-          newGuessedWords[newGuessedWords.length - 1] = currentWordArr
-          setGuessedWords(newGuessedWords)
+      const currentWordArr = getCurrentWordArr();
 
-          const availableSpaceEl = document.getElementById(String(availableSpace))
+      // Only allow adding letters if we're on the current line and haven't filled all 5 spaces
+      if (currentWordArr && 
+          currentWordArr.length < 5 && 
+          availableSpace <= (guessWordCount + 1) * 5) {
+          
+          const newGuessedWords = [...guessedWords];
+          currentWordArr.push(letter);
+          newGuessedWords[newGuessedWords.length - 1] = currentWordArr;
+          setGuessedWords(newGuessedWords);
 
+          const availableSpaceEl = document.getElementById(String(availableSpace));
           if (availableSpaceEl) {
-              availableSpaceEl.textContent = letter
-              setAvailableSpace(availableSpace + 1)
+              availableSpaceEl.textContent = letter;
+              setAvailableSpace(availableSpace + 1);
           }
       }
   }
@@ -397,20 +424,54 @@ const WordleGame = () => {
     const newBotMatchedLetters = checkMatchedLetters(botGuessedWord);
     console.log("matchedLetters: ", newBotMatchedLetters);
   
-    // Update previous guesses with the current guess and feedback
-    setTimeout(setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]), 2000);
+    // Update previous guesses immediately instead of using setTimeout
+    setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]);
+
+    const interval = 300; // Same interval as used in animations
+    const animationDelay = interval * 5; // Total animation time for 5 letters
 
     // Check if the bot has won or if the game is over due to maximum attempts reached
     if (newBotMatchedLetters.every(matched => matched === 'green')) {
-      setGameOver(true);
-      setMessage(`Bot won! The word was ${botGuessedWord.toUpperCase()}`);
+      setTimeout(() => {
+        setGameOver(true);
+        setMessage(`Bot won! The word was ${botGuessedWord.toUpperCase()}`);
+        revealAllBotGuesses(botGuessedWord);
+      }, animationDelay);
     } else if (attempts >= 6) {
-      setGameOver(true);
-      setMessage(`Game Over! Neither player found the word: ${TARGET_WORD.toUpperCase()}`);
+      setTimeout(() => {
+        setGameOver(true);
+        setMessage(`Game Over! Neither player found the word: ${TARGET_WORD.toUpperCase()}`);
+        revealAllBotGuesses(botGuessedWord);
+      }, animationDelay);
     } else {
       // Prepare for the next turn
       setBotColor(getFeedbackString(newBotMatchedLetters));
     }
+  };
+
+  const revealAllBotGuesses = (finalGuess = null) => {
+    // Get all bot's previous guesses and animate them
+    const allGuesses = finalGuess 
+      ? [...botPreviousGuesses, { guess: finalGuess, feedback: checkMatchedLetters(finalGuess) }]
+      : botPreviousGuesses;
+
+    allGuesses.forEach((guess, guessIndex) => {
+      const word = guess.guess;
+      const firstLetterID = guessIndex * 5 + 1;
+      
+      // Animate each letter in the word
+      word.split('').forEach((letter, letterIndex) => {
+        const tileArr = getTileColor(letter, letterIndex);
+        const tileColorRGB = tileArr[0];
+        
+        const letterID = (firstLetterID + letterIndex).toString() + "_botID";
+        const letterEl = document.getElementById(letterID);
+        if (letterEl) {
+          letterEl.textContent = letter.toUpperCase();
+          letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
+        }
+      });
+    });
   };
 
     

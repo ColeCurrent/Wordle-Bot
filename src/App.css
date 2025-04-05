@@ -59,6 +59,8 @@
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 #bot-board-container {
@@ -75,20 +77,23 @@
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .square {
   border: 2px solid rgb(58, 58, 60);
-  min-width: 50px; 
-  min-height: 50px;
-  font-size: 50px;
+  width: 62px;
+  height: 62px;
+  font-size: 2.5rem;
   font-weight: bold;
   color: gainsboro;
   text-transform: uppercase;
-
   display: flex;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
+  line-height: 1;
 }
 
 #keyboard-container {
