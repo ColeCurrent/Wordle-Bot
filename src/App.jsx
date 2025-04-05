@@ -2,26 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Keyboard from './components/Keyboard';
 import { startWordle, processBotGuess } from './services/wordleApi';
+import { getFeedbackString } from './utils/gameUtils';
 
-
-const getFeedbackString = (feedback) => {
-  /**
-   *    Returns a string representation of the feedback colors
-   *    worldle.py sends format "green", App.jsx expects format "g"
-   */
-  return feedback.map(color => {
-    switch (color) {
-      case 'green':
-        return 'g';
-      case 'yellow':
-        return 'y';
-      case 'gray':
-        return 'b'; // Assuming 'b' represents gray in your string
-      default:
-        return '_'; // Handle other cases as needed
-    }
-  }).join('');
-};
+// Hooks
+import { useBotTurn } from './hooks/useBotTurn';
+import { useTargetWord } from './hooks/useTargetWord';
+import { useSuggestedWord } from './hooks/useSuggestedWord';
+import { useRandomTargetWord } from './hooks/useRandomTargetWord';
+import { useGameInitialization } from './hooks/useGameInitialization';
 
 
 const WordleGame = () => {
@@ -43,38 +31,6 @@ const WordleGame = () => {
   let hasRunEffect = false;
   
 
- useEffect(() => {
-    /**
-     *  Sets random target word
-     */
-
-    fetch('/all_possible_five_letter_words.txt') 
-    .then(response => response.text()) // Converts txt file to string
-
-    .then(text => {
-      // Split text into array of lowercase words
-      const wordsArray = text.split('\n').map(word => word.trim().toLowerCase());
-
-      wordsArray.filter(word => word.length === 5); // Finds all 5 letter words
-      // wordList = wordsArray;
-      setWordList(wordsArray);
-            console.log("wordsArray: ", wordsArray);
-
-    })
-
-    .catch(error => console.error("Error fetching word list:", error));
-  }, []);
-
-  useEffect(() => {
-     const randomIndex = Math.floor(Math.random() * wordList.length);
-     setTargetWord(wordList[randomIndex]);
-     setAvailability(true); 
-     console.log("TARGETWORD: ", TARGET_WORD);
-
-  }, [wordList]);  // This effect runs only when wordList is updated
-
-
-
   function handleKeyInput(key) {
       // Prevent any input if game is over
       if (gameOver) {
@@ -87,22 +43,9 @@ const WordleGame = () => {
           handleDeleteLetter();
       } else {
           updateGuessedWords(key);
-          console.log(key);
       }
   }
 
-  /**
-   *    Create user board, bot board, and key listeners
-   */
-   useEffect(() => {
-    if (!hasRunEffect) {
-        console.log("cus");
-        createUserSquares();
-        createBotSquares();
-        hasRunEffect = true;
-        console.log(hasRunEffect);
-    }
-  }, []);
 
   function getTileColor(letter, index) {
     /**
@@ -114,7 +57,6 @@ const WordleGame = () => {
     */  
 
     const isCorrectLetter = TARGET_WORD.includes(letter);
-    console.log(TARGET_WORD);
 
     if(!isCorrectLetter) {
         return ["rgb(58, 58, 60)", "b"];
@@ -131,14 +73,10 @@ const WordleGame = () => {
   };
 
 
-  /**
-   * When user hits enter, grabs current word, animates row, push current word to guessedWords
-   */
    const handleUserWord = () => {
-      console.log("handleUserWord");
-
-      console.log("WordList: ", wordList);
-      console.log("TargetWord: ", TARGET_WORD);
+      /**
+       *  When user hits enter, grabs current word, animates row, push current word to guessedWords
+       */
 
       const currentWordArr = getCurrentWordArr();
       const currentWord = currentWordArr.join("");
@@ -171,7 +109,6 @@ const WordleGame = () => {
       currentWordArr.forEach((letter, index) => {
           setTimeout(() => {
               const tileArr = getTileColor(letter, index);
-              console.log("letter, index: ", letter, index);
               const tileColorRGB = tileArr[0];  // in form "rgb(83, 141, 78)"
               const tileColorChar = tileArr[1]; // in form "g"
 
@@ -206,19 +143,6 @@ const WordleGame = () => {
       }, interval * currentWordArr.length);
   };
 
-  /**
-   * Runs handleBotGuess() once the user makes their guess
-   *
-   * Used to align attempt states due to setTimeout() 
-   */
-  useEffect(() => {
-    if (isBotTurn) {
-        handleBotGuess();
-        // setAttempts(prevAttempt => prevAttempt + 1);
-        setIsBotTurn(false);  // Reset after the bot makes its guess
-    }
-  }, [isBotTurn]);  // Trigger only when it's the bot's turn
-
 
   function handleDeleteLetter() {
       // Prevent deleting letters if game is over
@@ -244,10 +168,12 @@ const WordleGame = () => {
       }
   }
 
+
   function getCurrentWordArr() {
       const numberOfGuessedWords = guessedWords.length
       return guessedWords[numberOfGuessedWords - 1]
   }
+
 
   function updateGuessedWords(letter) {
       // Prevent adding letters if game is over
@@ -278,7 +204,6 @@ const WordleGame = () => {
 
   function createUserSquares() {
       const gameBoard = document.getElementById("board");
-      console.log("createUserSquares");
       for (let index = 0; index < 30; index++) {
           let square = document.createElement("div");
           square.classList.add("square");
@@ -289,6 +214,7 @@ const WordleGame = () => {
 
       }
   }
+
 
   function createBotSquares() {
     const gameBoard = document.getElementById("bot-board");
@@ -305,9 +231,6 @@ const WordleGame = () => {
   }
 
  
-    // NEW ABOVE, OLD BELOW
-
-
   const handleBotGuess = async () => {
     /**
      *    Directs API calls to makeBotGuess() regarding the bots guesses   
@@ -320,12 +243,10 @@ const WordleGame = () => {
     const newAttempts = attempts + 1;
     setAttempts(newAttempts);
     
-    console.log("newAttempts: ", newAttempts);
 
     // First iteration
     if (newAttempts === 1) {
         const suggestedWord = await startWordle(); // Await the suggested word
-        console.log("firstSuggestedWord: ", suggestedWord);
     
         // Animate first guess manually
         const firstLetterID = ((newAttempts - 1) * 5) + 1;  // Calculate based on attempts
@@ -350,19 +271,16 @@ const WordleGame = () => {
 
       makeBotGuess(suggestedWord);
     } else {
-        console.log("botPreviousGuesses: ", botPreviousGuesses);
         const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
         const response = await processBotGuess(lastGuess, botColor);
         if (response && response.nextGuess) {
             setSuggestedWord(response.nextGuess);
         }
-        console.log("nonfirstSuggestedWord: ", suggestedWord);
     }
   };
 
 
   const animateBotGuess = (suggestedWord) => {
-    console.log("gameOver: ", gameOver);
     if(gameOver){ return } 
     
     const firstLetterID = ((attempts - 1) * 5) + 1;  // Calculate based on attempts
@@ -386,6 +304,7 @@ const WordleGame = () => {
     });
   };
 
+
   const makeBotGuess = (botGuessedWord) => {
     /**
      *    Update bots previous guesses
@@ -393,7 +312,6 @@ const WordleGame = () => {
      */
 
     const newBotMatchedLetters = checkMatchedLetters(botGuessedWord);
-    console.log("matchedLetters: ", newBotMatchedLetters);
   
     // Update previous guesses immediately instead of using setTimeout
     setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]);
@@ -420,6 +338,7 @@ const WordleGame = () => {
     }
   };
 
+
   const revealAllBotGuesses = (finalGuess = null) => {
     // Get all bot's previous guesses and animate them
     const allGuesses = finalGuess 
@@ -445,18 +364,6 @@ const WordleGame = () => {
     });
   };
 
-    
-  /** 
-   *  Runs function everytime 'suggestWord' is updated, makes bot guess and animates bots word
-   */
-
-  useEffect(() => {
-    if (suggestedWord) {
-      makeBotGuess(suggestedWord);
-      animateBotGuess(suggestedWord);
-    }
-  }, [suggestedWord]); 
-
 
   const checkMatchedLetters = (guessWord) => {
     /**
@@ -465,7 +372,6 @@ const WordleGame = () => {
 
     const newMatchedLetters = Array(5).fill(null);
 
-    console.log("guessWord: ", guessWord);
     // Loops through every letter in wordle word
     for (let i = 0; i < TARGET_WORD.length; i++) {
       if (guessWord[i] === TARGET_WORD[i]) {
@@ -481,8 +387,26 @@ const WordleGame = () => {
     return newMatchedLetters;
   };
 
+  // Hooks
+  useBotTurn(isBotTurn, setIsBotTurn, handleBotGuess);
+  useTargetWord(wordList, setWordList, setTargetWord);
+  useSuggestedWord(suggestedWord, makeBotGuess, animateBotGuess);
+  useRandomTargetWord(wordList, setTargetWord, setAvailability);
+  // useGameInitialization(createUserSquares, createBotSquares);
 
-  // Displays UIs
+  useEffect(() => {
+    /**
+     *    Create user board, bot board, and key listeners
+     */
+    if (!hasRunEffect) {
+        createUserSquares();
+        createBotSquares();
+        hasRunEffect = true;
+    }
+  }, []);
+
+
+  // Displays UI
   return (
     <div className="App">
       <div className="game-container">

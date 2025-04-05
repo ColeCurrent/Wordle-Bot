@@ -55,9 +55,6 @@ export const processBotGuess = async (currentGuess, letterColors) => {
    */
   try {
     const response = await sendRequest('/api/guess', { currentGuess, letterColors });
-    if (response.error) {
-      throw new Error(response.error);
-    }
     return response;
   } catch (error) {
     console.error('Error processing guess:', error);
