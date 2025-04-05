@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-
+import Keyboard from './components/Keyboard';
 
 const sendRequest = async (endpoint, data, callback = null) => {
   /**
@@ -64,7 +64,11 @@ const WordleGame = () => {
   const [botColor, setBotColor] = useState("bbbbb");
   const [isBotTurn, setIsBotTurn] = useState(false); 
   const [isAvailable, setAvailability] = useState(false);
-  let hasRunEffect = false; 
+  const [message, setMessage] = useState("");
+  const [guessedWords, setGuessedWords] = useState([[]]);
+  const [availableSpace, setAvailableSpace] = useState(1);
+  const [guessWordCount, setGuessWordCount] = useState(0);
+  let hasRunEffect = false;
   
 
  useEffect(() => {
@@ -99,19 +103,21 @@ const WordleGame = () => {
 
 
 
-  let guessedWords = [[]];
-  let availableSpace = 1;
-
-  // let word = "white"; 
-  let guessWordCount = 0;
+  function handleKeyInput(key) {
+      if (key === 'enter') {
+          handleUserWord();
+      } else if (key === 'del') {
+          handleDeleteLetter();
+      } else {
+          updateGuessedWords(key);
+          console.log(key);
+      }
+  }
 
   /**
    *    Create user board, bot board, and key listeners
    */
    useEffect(() => {
-
-    attachKeyListeners();
-
     if (!hasRunEffect) {
         console.log("cus");
         createUserSquares();
@@ -119,18 +125,17 @@ const WordleGame = () => {
         hasRunEffect = true;
         console.log(hasRunEffect);
     }
+  }, []);
 
-    return () => removeKeyListeners();
-   }, []);
-
-  /**
-   * Returns the color of a given tile 
-   * 
-   * @param char letter: letter contained in given tile
-   * @param int index: index of letter in word 
-   * @return array [(string of rgb value of given index), (letter char in form "g", "y", "b")]
-  */  
   function getTileColor(letter, index) {
+    /**
+     * Returns the color of a given tile 
+     * 
+     * @param char letter: letter contained in given tile
+     * @param int index: index of letter in word 
+     * @return array [(string of rgb value of given index), (letter char in form "g", "y", "b")]
+    */  
+
     const isCorrectLetter = TARGET_WORD.includes(letter);
     console.log(TARGET_WORD);
 
@@ -153,31 +158,7 @@ const WordleGame = () => {
    * When user hits enter, grabs current word, animates row, push current word to guessedWords
    */
    const handleUserWord = () => {
-
-/**
-    console.log("WordList: ", wordList);
-    // Checks if over
-    if (!wordList.includes(guess) || gameOver) return;
-
-    const newAttempts = attempts + 1;
-    setAttempts(newAttempts);
-
-    // Apply colors
-    const newMatchedLetters = checkMatchedLetters(guess);
-
-    // Update previous guess with current guess + feedback
-    setUserPreviousGuesses(prevGuesses => [...prevGuesses, { guess, feedback: newMatchedLetters }]);
-    setGuess('');
-
-    // Checks if user won
-    if ((newMatchedLetters.every(matched => matched === 'green')) || (newAttempts === 6)) {
-      setGameOver(true);
-    } else {
-      console.log("attempts: ", attempts);
-      handleBotGuess();
-    }
-        */
-        
+      console.log("handleUserWord");
 
       console.log("WordList: ", wordList);
       console.log("TargetWord: ", TARGET_WORD);
@@ -186,17 +167,16 @@ const WordleGame = () => {
       const currentWord = currentWordArr.join("")
       setGuess(currentWord);
       if (currentWordArr.length !== 5) {
-          window.alert("Not enough letters");
+          setMessage("Not enough letters");
           return;
       }
 
 
       // Apply colors
-      const newMatchedLetters = checkMatchedLetters(guess);
+      const newMatchedLetters = checkMatchedLetters(currentWord);
 
       // Update previous guess with current guess + feedback
-      setUserPreviousGuesses(prevGuesses => [...prevGuesses, { guess, feedback: newMatchedLetters }]);
-      setGuess('');
+      setUserPreviousGuesses(prevGuesses => [...prevGuesses, { guess: currentWord, feedback: newMatchedLetters }]);
 
 
       const firstLetterID = guessWordCount * 5 + 1;
@@ -216,22 +196,26 @@ const WordleGame = () => {
 
               const letterID = firstLetterID + index;
               const letterEl = document.getElementById(letterID);
-              letterEl.classList.add("animate__flipInX");
-              letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
+              if (letterEl) {
+                  letterEl.classList.add("animate__flipInX");
+                  letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
+              }
           }, interval * index);
       });
 
-      guessWordCount += 1;
+      setGuessWordCount(prevCount => prevCount + 1);
 
       if (currentWord === TARGET_WORD) {
-          window.alert("Congratuations!");
+          setMessage("Congratulations!");
+          setGameOver(true);
       }
 
       if (guessedWords.length === 6) {
-          window.alert(`You lost :( The word is ${TARGET_WORD}`);
+          setMessage(`Game Over! The word was ${TARGET_WORD}`);
+          setGameOver(true);
       }
 
-      guessedWords.push([]);
+      setGuessedWords([...guessedWords, []]);
         
       // Wait for all the setTimeouts to complete before joining arrays
       setTimeout(() => {
@@ -255,66 +239,40 @@ const WordleGame = () => {
 
   function handleDeleteLetter() {
       const currentWordArr = getCurrentWordArr()
-      const removedLetter = currentWordArr.pop()
+      currentWordArr.pop()
 
-      guessedWords[guessedWords.length - 1] = currentWordArr
+      const newGuessedWords = [...guessedWords]
+      newGuessedWords[newGuessedWords.length - 1] = currentWordArr
+      setGuessedWords(newGuessedWords)
 
-      const lastLetterEl = document.getElementById(String(availableSpace))
+      const lastLetterEl = document.getElementById(String(availableSpace - 1))
 
-      lastLetterEl.textContent = ''
-      availableSpace = availableSpace - 1
-  }
-
-
-  function attachKeyListeners() {
-      const keys = document.querySelectorAll('.keyboard-row button');
-      for (let i = 0; i < keys.length; i++) {
-          keys[i].onclick = (event) => {
-              const letter = event.target.getAttribute("data-key");
-
-              if (letter === 'enter') {
-                  handleUserWord();
-                  return;
-              }
-
-              if (letter === 'del'){
-                  handleDeleteLetter();
-                  return;
-              }
-
-              updateGuessedWords(letter)
-
-              console.log(letter);
-          };
+      if (lastLetterEl) {
+          lastLetterEl.textContent = ''
+          setAvailableSpace(availableSpace - 1)
       }
   }
-
-
-  function removeKeyListeners() {
-      const keys = document.querySelectorAll('.keyboard-row button');
-      for (let i = 0; i < keys.length; i++) {
-          keys[i].onclick = null; // Remove onclick listener
-      }
-  }
-
 
   function getCurrentWordArr() {
       const numberOfGuessedWords = guessedWords.length
       return guessedWords[numberOfGuessedWords - 1]
   }
 
-
   function updateGuessedWords(letter) {
       const currentWordArr = getCurrentWordArr()
 
       if (currentWordArr && currentWordArr.length < 5) {
+          const newGuessedWords = [...guessedWords]
           currentWordArr.push(letter)
+          newGuessedWords[newGuessedWords.length - 1] = currentWordArr
+          setGuessedWords(newGuessedWords)
 
           const availableSpaceEl = document.getElementById(String(availableSpace))
 
-          availableSpace = availableSpace + 1
-
-          availableSpaceEl.textContent = letter;
+          if (availableSpaceEl) {
+              availableSpaceEl.textContent = letter
+              setAvailableSpace(availableSpace + 1)
+          }
       }
   }
 
@@ -350,46 +308,6 @@ const WordleGame = () => {
  
     // NEW ABOVE, OLD BELOW
 
-    
-  const handleInputChange = (event) => {
-    /**
-     *   Handles user input
-     */
-
-    setGuess(event.target.value.trim().toLowerCase().substr(0, 5));
-  };
-
-
-  const handlePlayerGuess = () => {
-    /**
-     *    Checks user guess
-     *    Updates previousUserGuesses array
-     *    Checks if user won
-     */
-
-    // Checks if over
-    console.log("wl: ", wordList);
-    if (!wordList.includes(guess) || gameOver) return;
-
-    const newAttempts = attempts + 1;
-    setAttempts(newAttempts);
-
-    // Apply colors
-    const newMatchedLetters = checkMatchedLetters(guess);
-
-    // Update previous guess with current guess + feedback
-    setUserPreviousGuesses(prevGuesses => [...prevGuesses, { guess, feedback: newMatchedLetters }]);
-    setGuess('');
-
-    // Checks if user won
-    if ((newMatchedLetters.every(matched => matched === 'green')) || (newAttempts === 6)) {
-      setGameOver(true);
-    } else {
-      console.log("attempts: ", attempts);
-      handleBotGuess();
-    }
-  };
-
 
   const handleBotGuess = async () => {
     /**
@@ -410,10 +328,10 @@ const WordleGame = () => {
           
         const suggestedWord = await startWordle(); // Await the suggested word
 
-       console.log("firstSuggestedWord: ", suggestedWord);
+        console.log("firstSuggestedWord: ", suggestedWord);
     
-        // Aniamte first guess manually
-        const firstLetterID = guessWordCount * 5 + 1;
+        // Animate first guess manually
+        const firstLetterID = ((newAttempts - 1) * 5) + 1;  // Calculate based on attempts
         const interval = 300;
         let currentColors = [];
     
@@ -436,26 +354,20 @@ const WordleGame = () => {
         makeBotGuess(suggestedWord);
 
     } else {   // Every non-first Iteration
-
-      console.log("botPreviousGuesses: ", botPreviousGuesses);
-      // pulls last string out of botPreviousGuesses array
-      const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
-
-      // const suggestedWord = await processBotGuess(lastGuess, botColor, () => {});
-      await processBotGuess(lastGuess, botColor, () => {});
-
-
-      console.log("nonfirstSuggestedWord: ", suggestedWord);
-
+        console.log("botPreviousGuesses: ", botPreviousGuesses);
+        // pulls last string out of botPreviousGuesses array
+        const lastGuess = botPreviousGuesses[botPreviousGuesses.length - 1].guess;
+        await processBotGuess(lastGuess, botColor, () => {});
+        console.log("nonfirstSuggestedWord: ", suggestedWord);
     }
-
   };
 
 
   const animateBotGuess = (suggestedWord) => {
     console.log("gameOver: ", gameOver);
     if(gameOver){ return } 
-    const firstLetterID = attempts * 5 - 4;
+    
+    const firstLetterID = ((attempts - 1) * 5) + 1;  // Calculate based on attempts
     const interval = 300;
     let currentColors = [];
     
@@ -472,14 +384,9 @@ const WordleGame = () => {
             const letterEl = document.getElementById(letterID);
             letterEl.classList.add("animate__flipInX");
             letterEl.style = `background-color:${tileColorRGB};border-color:${tileColorRGB}`;
-
         }, interval * index);
-
     });
-
   };
-
-
 
   const makeBotGuess = (botGuessedWord) => {
     /**
@@ -493,12 +400,13 @@ const WordleGame = () => {
     // Update previous guesses with the current guess and feedback
     setTimeout(setBotPreviousGuesses(prevGuesses => [...prevGuesses, { guess: botGuessedWord, feedback: newBotMatchedLetters }]), 2000);
 
-
     // Check if the bot has won or if the game is over due to maximum attempts reached
-    if (newBotMatchedLetters.every(matched => matched === 'green') || attempts >= 6) {
+    if (newBotMatchedLetters.every(matched => matched === 'green')) {
       setGameOver(true);
-      // Additional logic if needed when the game is over
-      console.log('Game Over. Bot guessed the word or max attempts reached.');
+      setMessage(`Bot won! The word was ${botGuessedWord.toUpperCase()}`);
+    } else if (attempts >= 6) {
+      setGameOver(true);
+      setMessage(`Game Over! Neither player found the word: ${TARGET_WORD.toUpperCase()}`);
     } else {
       // Prepare for the next turn
       setBotColor(getFeedbackString(newBotMatchedLetters));
@@ -562,29 +470,6 @@ const WordleGame = () => {
   };
 
 
-  const handleEnterKey = (event) => {
-    /**
-     *    Handle Enter key press
-     */
-
-    if (event.key === 'Enter') {
-      handlePlayerGuess();
-    }
-  };
-
-
-  useEffect(() => {
-    /**
-     *    Handle Enter key press
-     */
-
-    document.addEventListener('keydown', handleEnterKey);
-    return () => {
-      document.removeEventListener('keydown', handleEnterKey);
-    };
-  }, [handlePlayerGuess]);
-
-
   const checkMatchedLetters = (guessWord) => {
     /**
      *    Returns array of guesses matching colors 
@@ -609,162 +494,24 @@ const WordleGame = () => {
   };
 
 
-  const resetGame = () => {
-    /**
-     *    Resets game
-     */
-    setGuess('');
-    setAttempts(0);
-    setGameOver(false);
-    setUserPreviousGuesses([]);
-    setBotPreviousGuesses([]);
-    const randomIndex = Math.floor(Math.random() * wordList.length);
-    setTargetWord(wordList[randomIndex]);
-  };
-
-
   // Displays UIs
   return (
-    <div className="wordle-game-container">
-
+    <div className="App">
       <div className="game-container">
-
-
-        <div className="player-game">
-          <h1>Player's Game</h1>
-
-          <div id="board-container">
-                <div id="board"></div>
-          </div>
-
-          {/* TEMP */}
-          <button onClick={() => { setGuess('slate'); handlePlayerGuess(); }} disabled={gameOver}>
-            slate
-          </button>
-
-          {userPreviousGuesses.length > 0 && (
-            <div>
-              {userPreviousGuesses.map((prevGuess, index) => (
-                <div key={index}>
-                  <h1>
-                    {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
-                      <span
-                        key={idx}
-                        className={prevGuess.feedback[idx]} // Apply the class based on feedback color
-                      >
-                        {letter}
-                      </span>
-                    ))}
-                  </h1>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <input
-            type="text"
-            maxLength={5}
-            value={guess}
-            onChange={handleInputChange}
-            disabled={gameOver}
-          />
-
-          <p>Attempts: {attempts}</p>
-          <button onClick={handlePlayerGuess} disabled={gameOver}>
-            Guess
-          </button>
-
-          <button onClick={resetGame} disabled={gameOver} id="Reset_Button">
-            Reset Game
-          </button>
-
-          {gameOver && (
-            <p className="game-over">
-
-              {userPreviousGuesses[userPreviousGuesses.length - 1].feedback.every(matched => matched === 'green')
-                ? 'You guessed the word!'
-                : 'You lost!'} The word was: {TARGET_WORD.toUpperCase()}
-            </p>
-          )}
-
+        <div className="message-container">
+          <h3>{message}</h3>
         </div>
-              
-
-        <div className="bot-game">
-          <h1>Bot's Game</h1>
-
-          <div id="bot-board-container">
-                <div id="bot-board"></div>
+        <div className="boards-container">
+          <div className="tile-container">
+            <div id="board"></div>
           </div>
-
-          {botPreviousGuesses.length > 0 && (
-            <div>
-              {botPreviousGuesses.map((prevGuess, index) => (
-                <div key={index}>
-                  <h1> 
-                    {prevGuess.guess.toUpperCase().split('').map((letter, idx) => (
-                      <span
-                        key={idx}
-                        className={`${prevGuess.feedback[idx]} ${gameOver ? 'reveal-text' : ''}`} // Add 'reveal-text' if the game is over
-                        // className={prevGuess.feedback[idx]} // Apply the class based on feedback color
-                      >
-                        {letter}
-                      </span>
-                    ))}
-                  </h1>
-                </div>
-              ))}
-            </div>
-          )}
-
+          <div className="tile-container">
+            <div id="bot-board"></div>
+          </div>
         </div>
-
- 
+        <Keyboard onKeyPress={handleKeyInput} />
       </div>
-
-      <div id="keyboard-container">
-          <div className="keyboard-row">
-              <button data-key="q">q</button>
-              <button data-key="w">w</button>
-              <button data-key="e">e</button>
-              <button data-key="r">r</button>
-              <button data-key="t">t</button>
-              <button data-key="y">y</button>
-              <button data-key="u">u</button>
-              <button data-key="i">i</button>
-              <button data-key="o">o</button>
-              <button data-key="p">p</button>
-          </div>
-          <div className="keyboard-row">
-              <div className="spacer-half"></div>
-              <button data-key="a">a</button>
-              <button data-key="s">s</button>
-              <button data-key="d">d</button>
-              <button data-key="f">f</button>
-              <button data-key="g">g</button>
-              <button data-key="h">h</button>
-              <button data-key="j">j</button>
-              <button data-key="k">k</button>
-              <button data-key="l">l</button>
-              <div className="spacer-half"></div>
-          </div>
-          <div className="keyboard-row">
-              <button data-key="enter" className="wide-button">Enter</button>
-              <button data-key="z">z</button>
-              <button data-key="x">x</button>
-              <button data-key="c">c</button>
-              <button data-key="v">v</button>
-              <button data-key="b">b</button>
-              <button data-key="n">n</button>
-              <button data-key="m">m</button>
-              <button data-key="del" className="wide-button">Del</button>
-          </div>
-
-        </div>
-
     </div>
-
-
   );
 };
 

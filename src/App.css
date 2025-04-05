@@ -16,10 +16,33 @@
 /* Game container */
 .game-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  max-width: 800px; /* Adjust as needed */
-  /* margin-bottom: 300px; */
+  max-width: 1000px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.title-container {
+  /* margin: 20px 0; */
+}
+
+.message-container {
+  height: 30px;
+  margin-bottom: 20px;
+}
+
+.boards-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.tile-container {
+  width: 330px;
 }
 
 #board-container {
@@ -70,7 +93,10 @@
 
 #keyboard-container {
   height: 200px;
-  width: 50%;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  margin-top: 20px;
 }
 
 .keyboard-row {
@@ -94,7 +120,7 @@
   text-transform: uppercase;
   margin-right: 6px;
   border-radius: 4px;
-  user-select: none;
+  /* user-select: none; */
 }
 
 .keyboard-row button.wide-button {
@@ -216,4 +242,11 @@
 
 .reveal-text {
   color: black !important; /* Override text color */
+}
+
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background-color: #121213;
+  color: white;
 }
