@@ -76,7 +76,7 @@ const WordleGame = () => {
      *  Sets random target word
      */
 
-    fetch('/five_letter_words.txt') 
+    fetch('/all_possible_five_letter_words.txt') 
     .then(response => response.text()) // Converts txt file to string
 
     .then(text => {
